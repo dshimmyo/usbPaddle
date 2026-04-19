@@ -41,43 +41,32 @@ void setup() {
 void loop() {
   if (!usb_hid.ready()) return;
 
-  // 1. Read Paddle (Axis X)
+  // 1. Paddle (X-Axis)
   int rawValue = analogRead(POT_PIN);
   int8_t x_axis = map(rawValue, 0, 4095, -127, 127);
 
-  // 2. D-Pad Logic (The "Hat")
-  uint8_t hat = GAMEPAD_HAT_CENTERED; // Default to 8 (Centered)
-  
-  bool u = !digitalRead(BTN_UP);
-  bool d = !digitalRead(BTN_DOWN);
-  bool l = !digitalRead(BTN_LEFT);
-  bool r = !digitalRead(BTN_RIGHT);
+  // 2. D-Pad (The Hat)
+  uint8_t hat = GAMEPAD_HAT_CENTERED;
+  if      (!digitalRead(BTN_UP))    hat = GAMEPAD_HAT_UP;
+  else if (!digitalRead(BTN_DOWN))  hat = GAMEPAD_HAT_DOWN;
+  else if (!digitalRead(BTN_LEFT))  hat = GAMEPAD_HAT_LEFT;
+  else if (!digitalRead(BTN_RIGHT)) hat = GAMEPAD_HAT_RIGHT;
 
-  // Check diagonals first, then cardinal directions
-  if (u && r)      hat = GAMEPAD_HAT_UP_RIGHT;
-  else if (u && l) hat = GAMEPAD_HAT_UP_LEFT;
-  else if (d && r) hat = GAMEPAD_HAT_DOWN_RIGHT;
-  else if (d && l) hat = GAMEPAD_HAT_DOWN_LEFT;
-  else if (u)      hat = GAMEPAD_HAT_UP;
-  else if (d)      hat = GAMEPAD_HAT_DOWN;
-  else if (l)      hat = GAMEPAD_HAT_LEFT;
-  else if (r)      hat = GAMEPAD_HAT_RIGHT;
-
-  // 3. Action Buttons (Face Buttons)
+  // 3. The "Stella Match" Buttons
   uint32_t buttons = 0;
-  if (!digitalRead(BTN_A)) buttons |= (1 << 0); // Button 0
-  if (!digitalRead(BTN_B)) buttons |= (1 << 1); // Button 1
-  if (!digitalRead(BTN_SELECT)) buttons |= (1 << 6); // Button 6 (Select)
-  if (!digitalRead(BTN_START))  buttons |= (1 << 7); // Button 7 (Start)
-  // 4. Send Report
-  hid_gamepad_report_t report = {
-    .x = x_axis, 
-    .y = 0, 
-    .z = 0, 
-    .rz = 0, .rx = 0, .ry = 0,
-    .hat = hat, 
-    .buttons = buttons
-  };
+  
+  // Use the indices that your RetroArch menu explicitly listed
+  if (!digitalRead(BTN_A))      buttons |= (1 << 4);  // Fire (4)
+  if (!digitalRead(BTN_B))      buttons |= (1 << 3);  // Trigger (3) - Usually 'Back' or 'A' in menu
+  if (!digitalRead(BTN_SELECT)) buttons |= (1 << 9);  // Select (9)
+  if (!digitalRead(BTN_START))  buttons |= (1 << 10); // Reset/Start (10)
+
+  // 4. Clean Report
+  hid_gamepad_report_t report;
+  memset(&report, 0, sizeof(report));
+  report.x       = x_axis;
+  report.hat     = hat;
+  report.buttons = buttons;
 
   usb_hid.sendReport(0, &report, sizeof(report));
   delay(10);
