@@ -1,7 +1,20 @@
 #include "Adafruit_TinyUSB.h"
 
 uint8_t const desc_hid_report[] = {
-  TUD_HID_REPORT_DESC_GAMEPAD()
+  TUD_HID_REPORT_DESC_GAMEPAD(), // This is the part that works for your Anbernic
+
+  // This adds the Rumble 'Ear' without confusing the OS
+  0x05, 0x01,        // Usage Page (Generic Desktop)
+  0x09, 0x05,        // Usage (Game Pad)
+  0xa1, 0x01,        // Collection (Application)
+    0x05, 0x01,      //   Usage Page (Generic Desktop)
+    0x09, 0xbb,      //   Usage (Feature: Rumble)
+    0x15, 0x00,      //   Logical Minimum (0)
+    0x26, 0xff, 0x00,//   Logical Maximum (255)
+    0x75, 0x08,      //   Report Size (8 bits)
+    0x95, 0x02,      //   Report Count (2: Left/Right motors)
+    0x91, 0x02,      //   Output (Data, Var, Abs)
+  0xc0               // End Collection
 };
 
 Adafruit_USBD_HID usb_hid;
@@ -54,8 +67,9 @@ void setup() {
 // This function is called automatically whenever 
 // RetroArch or the OS sends a rumble command.
 void hid_out_report_cb(uint8_t report_id, hid_report_type_t report_type, uint8_t const* buffer, uint16_t bufsize) {
-  // Standard Gamepad Output Report is usually 2 or 4 bytes
-  // Format: [Strong Motor Intensity] [Weak Motor Intensity]
+  // Turn on the LED so we know the computer is actually sending data
+  digitalWrite(LED_BUILTIN, HIGH); 
+
   if (report_type == HID_REPORT_TYPE_OUTPUT) {
     if (bufsize >= 2) {
       left_motor_val = buffer[0];
