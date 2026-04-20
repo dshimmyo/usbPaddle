@@ -29,6 +29,9 @@ Adafruit_USBD_HID usb_hid;
 #define BTN_B 8
 #define BTN_SELECT 9
 #define BTN_START 10
+#define BTN_MENU A1
+#define BTN_X A2
+#define BTN_Y A3
 
 // Hardware Pin for the Rumble Motor (via transistor/MOSFET)
 #define MOTOR_PIN 2 // Use any PWM-capable pin
@@ -54,6 +57,10 @@ void setup() {
   pinMode(BTN_B, INPUT_PULLUP);
   pinMode(BTN_SELECT, INPUT_PULLUP);
   pinMode(BTN_START, INPUT_PULLUP);
+  pinMode(BTN_MENU, INPUT_PULLUP);
+  pinMode(BTN_X, INPUT_PULLUP);
+  pinMode(BTN_Y, INPUT_PULLUP);
+
   pinMode(MOTOR_PIN, OUTPUT);
 
   analogReadResolution(12);
@@ -97,10 +104,15 @@ void loop() {
   uint32_t buttons = 0;
   
   // Use the indices that your RetroArch menu explicitly listed
-  if (!digitalRead(BTN_A))      buttons |= (1 << 4);  // Fire (4)
-  if (!digitalRead(BTN_B))      buttons |= (1 << 3);  // Trigger (3) - Usually 'Back' or 'A' in menu
+  if (!digitalRead(BTN_A))      buttons |= (1 << 3);  // Fire (4)
+  if (!digitalRead(BTN_B))      buttons |= (1 << 4);  // Trigger (3) - Usually 'Back' or 'A' in menu
   if (!digitalRead(BTN_SELECT)) buttons |= (1 << 9);  // Select (9)
   if (!digitalRead(BTN_START))  buttons |= (1 << 10); // Reset/Start (10)
+
+  // --- NEW BUTTONS (Using empty bits 0, 1, 2) ---
+  if (!digitalRead(BTN_X))      buttons |= (1 << 0);  // New Button X
+  if (!digitalRead(BTN_Y))      buttons |= (1 << 1);  // New Button Y
+  if (!digitalRead(BTN_MENU))   buttons |= (1 << 2);  // New Menu/Home Button 
 
   // 3a. rumble:
 
