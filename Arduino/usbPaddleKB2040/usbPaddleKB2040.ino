@@ -25,8 +25,8 @@ Adafruit_USBD_HID usb_hid;
 #define BTN_DOWN 4
 #define BTN_LEFT 5
 #define BTN_RIGHT 6
-#define BTN_A 7
-#define BTN_B 8
+#define BTN_A 7 //outside (right)
+#define BTN_B 8 //inside (left)
 #define BTN_SELECT 9
 #define BTN_START 10
 #define BTN_MENU A1
@@ -100,20 +100,19 @@ void loop() {
   else if (!digitalRead(BTN_LEFT))  hat = GAMEPAD_HAT_LEFT;
   else if (!digitalRead(BTN_RIGHT)) hat = GAMEPAD_HAT_RIGHT;
 
-  // 3. The "Stella Match" Buttons
+  // 3. Native Anbernic/RetroArch Mapping
   uint32_t buttons = 0;
   
-  // Use the indices that your RetroArch menu explicitly listed
-  if (!digitalRead(BTN_A))      buttons |= (1 << 3);  // Fire (4)
-  if (!digitalRead(BTN_B))      buttons |= (1 << 4);  // Trigger (3) - Usually 'Back' or 'A' in menu
-  if (!digitalRead(BTN_SELECT)) buttons |= (1 << 9);  // Select (9)
-  if (!digitalRead(BTN_START))  buttons |= (1 << 10); // Reset/Start (10)
-
-  // --- NEW BUTTONS (Using empty bits 0, 1, 2) ---
-  if (!digitalRead(BTN_X))      buttons |= (1 << 0);  // New Button X
-  if (!digitalRead(BTN_Y))      buttons |= (1 << 1);  // New Button Y
-  if (!digitalRead(BTN_MENU))   buttons |= (1 << 2);  // New Menu/Home Button 
-
+  // Mapping your pins to your discovered indices
+  if (!digitalRead(BTN_A))      buttons |= (1 << 4);  // Anbernic A Nintendo A
+  if (!digitalRead(BTN_B))      buttons |= (1 << 3);  // Anbernic B Nintendo B
+  if (!digitalRead(BTN_X))      buttons |= (1 << 6);  // Anbernic X
+  if (!digitalRead(BTN_Y))      buttons |= (1 << 5);  // Anbernic Y
+  
+  if (!digitalRead(BTN_SELECT)) buttons |= (1 << 9);  // Anbernic Select
+  if (!digitalRead(BTN_START))  buttons |= (1 << 10); // Anbernic Start
+  if (!digitalRead(BTN_MENU))   buttons |= (1 << 11); // Anbernic Menu (Press)
+  
   // 3a. rumble:
 
   uint8_t intensity = max(left_motor_val, right_motor_val);
