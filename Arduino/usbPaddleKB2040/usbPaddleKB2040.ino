@@ -1,20 +1,15 @@
 #include "Adafruit_TinyUSB.h"
 
 uint8_t const desc_hid_report[] = {
-  TUD_HID_REPORT_DESC_GAMEPAD(), // This is the part that works for your Anbernic
-
-  // This adds the Rumble 'Ear' without confusing the OS
-  0x05, 0x01,        // Usage Page (Generic Desktop)
-  0x09, 0x05,        // Usage (Game Pad)
-  0xa1, 0x01,        // Collection (Application)
-    0x05, 0x01,      //   Usage Page (Generic Desktop)
-    0x09, 0xbb,      //   Usage (Feature: Rumble)
-    0x15, 0x00,      //   Logical Minimum (0)
-    0x26, 0xff, 0x00,//   Logical Maximum (255)
-    0x75, 0x08,      //   Report Size (8 bits)
-    0x95, 0x02,      //   Report Count (2: Left/Right motors)
-    0x91, 0x02,      //   Output (Data, Var, Abs)
-  0xc0               // End Collection
+    0x05, 0x01, 0x09, 0x05, 0xa1, 0x01, 0x85, 0x01,
+    0x05, 0x01, 0x09, 0xbb, 0x15, 0x00, 0x26, 0xff,
+    0x00, 0x75, 0x08, 0x95, 0x02, 0x91, 0x02, 0x05,
+    0x01, 0x09, 0x01, 0xa1, 0x00, 0x09, 0x30, 0x09,
+    0x31, 0x15, 0x81, 0x25, 0x7f, 0x75, 0x08, 0x95,
+    0x02, 0x81, 0x02, 0xc0, 0x05, 0x09, 0x19, 0x01,
+    0x29, 0x0a, 0x15, 0x00, 0x25, 0x01, 0x75, 0x01,
+    0x95, 0x0a, 0x81, 0x02, 0x75, 0x01, 0x95, 0x06,
+    0x81, 0x03, 0xc0
 };
 
 Adafruit_USBD_HID usb_hid;
@@ -33,14 +28,25 @@ Adafruit_USBD_HID usb_hid;
 // Hardware Pin for the Rumble Motor (via transistor/MOSFET)
 #define MOTOR_PIN 2 // Use any PWM-capable pin
 
+// Custom struct to match the manual XInput-style hex descriptor
+typedef struct {
+  int8_t  x;       // X Axis
+  int8_t  y;       // Y Axis
+  uint16_t buttons; // 10 buttons + 6 padded bits
+} xinput_report_t;
+
 // Global variables for rumble intensity
 uint8_t left_motor_val = 0;
 uint8_t right_motor_val = 0;
 
 void setup() {
-  TinyUSBDevice.setManufacturerDescriptor("DKS Interactive LLC");
-  TinyUSBDevice.setProductDescriptor("DKS Paddle v0");
-  TinyUSBDevice.setID(0x239A, 0x8108); // Optional: Adafruit's VID/PID for KB2040
+  // TinyUSBDevice.setManufacturerDescriptor("DKS Interactive LLC");
+  // TinyUSBDevice.setProductDescriptor("DKS Paddle v0");
+  // TinyUSBDevice.setID(0x239A, 0x8108); // Optional: Adafruit's VID/PID for KB2040
+// Official Xbox 360 Controller for Windows IDs
+  TinyUSBDevice.setID(0x045E, 0x028E); 
+  TinyUSBDevice.setManufacturerDescriptor("Microsoft");
+  TinyUSBDevice.setProductDescriptor("XBOX 360 For Windows");
 
   usb_hid.setPollInterval(2);
   usb_hid.setReportDescriptor(desc_hid_report, sizeof(desc_hid_report));
@@ -64,13 +70,10 @@ void setup() {
 
 }
 
-// This function is called automatically whenever 
-// RetroArch or the OS sends a rumble command.
 void hid_out_report_cb(uint8_t report_id, hid_report_type_t report_type, uint8_t const* buffer, uint16_t bufsize) {
-  // Turn on the LED so we know the computer is actually sending data
   digitalWrite(LED_BUILTIN, HIGH); 
 
-  if (report_type == HID_REPORT_TYPE_OUTPUT) {
+  if (report_type == HID_REPORT_TYPE_OUTPUT && report_id == 1) {
     if (bufsize >= 2) {
       left_motor_val = buffer[0];
       right_motor_val = buffer[1];
@@ -85,34 +88,49 @@ void loop() {
   int rawValue = analogRead(POT_PIN);
   int8_t x_axis = map(rawValue, 0, 4095, -127, 127);
 
-  // 2. D-Pad (The Hat)
-  uint8_t hat = GAMEPAD_HAT_CENTERED;
-  if      (!digitalRead(BTN_UP))    hat = GAMEPAD_HAT_UP;
-  else if (!digitalRead(BTN_DOWN))  hat = GAMEPAD_HAT_DOWN;
-  else if (!digitalRead(BTN_LEFT))  hat = GAMEPAD_HAT_LEFT;
-  else if (!digitalRead(BTN_RIGHT)) hat = GAMEPAD_HAT_RIGHT;
+  // // 2. D-Pad (The Hat)
+  // uint8_t hat = GAMEPAD_HAT_CENTERED;
+  // if      (!digitalRead(BTN_UP))    hat = GAMEPAD_HAT_UP;
+  // else if (!digitalRead(BTN_DOWN))  hat = GAMEPAD_HAT_DOWN;
+  // else if (!digitalRead(BTN_LEFT))  hat = GAMEPAD_HAT_LEFT;
+  // else if (!digitalRead(BTN_RIGHT)) hat = GAMEPAD_HAT_RIGHT;
+
+  uint16_t buttons = 0;
+
+  // D-Pad Mapping (Standard Xbox Bit Positions)
+  if (!digitalRead(BTN_UP))    buttons |= (1 << 1);
+  if (!digitalRead(BTN_DOWN))  buttons |= (1 << 0);
+  if (!digitalRead(BTN_LEFT))  buttons |= (1 << 2);
+  if (!digitalRead(BTN_RIGHT)) buttons |= (1 << 3);
+
+  // Map your buttons to the 16-bit field
+  if (!digitalRead(BTN_A))      buttons |= (1 << 0); 
+  if (!digitalRead(BTN_B))      buttons |= (1 << 1);
+  if (!digitalRead(BTN_SELECT)) buttons |= (1 << 8); 
+  if (!digitalRead(BTN_START))  buttons |= (1 << 9);
+  // (Add others as needed)
+
+  xinput_report_t report;
+  report.x = x_axis;
+  report.y = 0;
+  report.buttons = buttons;
+
+  // Send on Report ID 1
+  usb_hid.sendReport(1, &report, sizeof(report));
 
   // 3. The "Stella Match" Buttons
-  uint32_t buttons = 0;
+  // uint32_t buttons = 0;
   
-  // Use the indices that your RetroArch menu explicitly listed
-  if (!digitalRead(BTN_A))      buttons |= (1 << 4);  // Fire (4)
-  if (!digitalRead(BTN_B))      buttons |= (1 << 3);  // Trigger (3) - Usually 'Back' or 'A' in menu
-  if (!digitalRead(BTN_SELECT)) buttons |= (1 << 9);  // Select (9)
-  if (!digitalRead(BTN_START))  buttons |= (1 << 10); // Reset/Start (10)
+  // // Use the indices that your RetroArch menu explicitly listed
+  // if (!digitalRead(BTN_A))      buttons |= (1 << 4);  // Fire (4)
+  // if (!digitalRead(BTN_B))      buttons |= (1 << 3);  // Trigger (3) - Usually 'Back' or 'A' in menu
+  // if (!digitalRead(BTN_SELECT)) buttons |= (1 << 9);  // Select (9)
+  // if (!digitalRead(BTN_START))  buttons |= (1 << 10); // Reset/Start (10)
 
   // 3a. rumble:
 
   uint8_t intensity = max(left_motor_val, right_motor_val);
   analogWrite(MOTOR_PIN, intensity);
 
-  // 4. Clean Report
-  hid_gamepad_report_t report;
-  memset(&report, 0, sizeof(report));
-  report.x       = x_axis;
-  report.hat     = hat;
-  report.buttons = buttons;
-
-  usb_hid.sendReport(0, &report, sizeof(report));
   delay(10);
 }
