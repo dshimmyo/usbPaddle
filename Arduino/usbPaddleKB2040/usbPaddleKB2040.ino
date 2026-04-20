@@ -60,8 +60,9 @@ void setup() {
 
   // Set the callback for receiving data FROM the host (Mac/PC/Handheld)
   usb_hid.setReportCallback(NULL, hid_out_report_cb);
-  analogWrite(MOTOR_PIN, 128);
-
+  analogWrite(MOTOR_PIN, 255);
+  delay(50);                   // Very short duration
+  analogWrite(MOTOR_PIN, 0);
 }
 
 // This function is called automatically whenever 
