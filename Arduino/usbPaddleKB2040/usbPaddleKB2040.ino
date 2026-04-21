@@ -21,6 +21,9 @@ Adafruit_USBD_HID usb_hid;
 
 // Define Pins
 #define POT_PIN A0
+#define POT_PIN1 A1
+#define POT_PIN2 A2
+#define POT_PIN3 A3
 #define BTN_UP 3
 #define BTN_DOWN 4
 #define BTN_LEFT 5
@@ -29,9 +32,9 @@ Adafruit_USBD_HID usb_hid;
 #define BTN_B 8 //inside (left)
 #define BTN_SELECT 9
 #define BTN_START 10
-#define BTN_MENU A1
-#define BTN_X A2
-#define BTN_Y A3
+#define BTN_MENU 0 //move to 11 on stemmaQT of KB2040
+#define BTN_X 1 //move to 12 on stemmaQT of KB2040
+#define BTN_Y 2
 
 // Hardware Pin for the Rumble Motor (via transistor/MOSFET)
 #define MOTOR_PIN 2 // Use any PWM-capable pin
