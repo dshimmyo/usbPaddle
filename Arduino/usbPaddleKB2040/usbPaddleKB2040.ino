@@ -1,7 +1,7 @@
 #include "Adafruit_TinyUSB.h"
 
-uint8_t const desc_hid_report[] = {
-  // Collection 1: Standard Gamepad for Anbernic (ID 1)
+uint8_t const desc_hid_report[] = { 
+  // Collection 1: Standard Gamepad for Anbernic (ID 1) //Composite HID (Absolute) profile settings
   0x05, 0x01,        // Usage Page (Generic Desktop)
   0x09, 0x05,        // Usage (Game Pad)
   0xa1, 0x01,        // Collection (Application)
@@ -40,7 +40,7 @@ uint8_t const desc_hid_report[] = {
     0x81, 0x01,      //   Input (Const)
   0xc0,              // End Collection (Application)
 
-  // Collection 2: Absolute Paddle for Steam Deck (ID 2)
+  // Collection 2: Absolute Paddle for Steam Deck (ID 2) //EXPERIMENTAL
   0x05, 0x01,        // Usage Page (Generic Desktop)
   0x09, 0x37,        // Usage (Dial) 
   0xa1, 0x01,        // Collection (Application)
