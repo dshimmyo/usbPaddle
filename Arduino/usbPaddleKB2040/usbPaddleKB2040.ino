@@ -100,8 +100,6 @@ void setup() {
   pinMode(BTN_X, INPUT_PULLUP);
   pinMode(BTN_Y, INPUT_PULLUP);
 
-  // pinMode(MOTOR_PIN, OUTPUT);
-
   analogReadResolution(12);
 
   // Set the callback for receiving data FROM the host (Mac/PC/Handheld)
