@@ -44,18 +44,18 @@ uint8_t const desc_normal[] = {
     0x81, 0x01,      //   Input (Const)
   0xc0,              // End Collection (Application)
 
-  // Collection 2: Absolute Paddle for Steam Deck (ID 2) //EXPERIMENTAL
-  0x05, 0x01,        // Usage Page (Generic Desktop)
-  0x09, 0x37,        // Usage (Dial) 
-  0xa1, 0x01,        // Collection (Application)
-    0x85, 0x02,      //   REPORT ID (2)
-    0x09, 0x30,      //   Usage (X)
-    0x15, 0x81,      //   Logical Minimum (-127)
-    0x25, 0x7f,      //   Logical Maximum (127)
-    0x75, 0x08,      //   Report Size (8 bits)
-    0x95, 0x01,      //   Report Count (1)
-    0x81, 0x02,      //   Input (Data, Var, Abs)
-  0xc0               // End Collection
+  // // Collection 2: Absolute Paddle for Steam Deck (ID 2) //EXPERIMENTAL
+  // 0x05, 0x01,        // Usage Page (Generic Desktop)
+  // 0x09, 0x37,        // Usage (Dial) 
+  // 0xa1, 0x01,        // Collection (Application)
+  //   0x85, 0x02,      //   REPORT ID (2)
+  //   0x09, 0x30,      //   Usage (X)
+  //   0x15, 0x81,      //   Logical Minimum (-127)
+  //   0x25, 0x7f,      //   Logical Maximum (127)
+  //   0x75, 0x08,      //   Report Size (8 bits)
+  //   0x95, 0x01,      //   Report Count (1)
+  //   0x81, 0x02,      //   Input (Data, Var, Abs)
+  // 0xc0               // End Collection
 };
 
 // --- 2. XINPUT DESCRIPTOR (Xbox 360 Spoof) ---
@@ -269,8 +269,8 @@ if (currentMode == MODE_MOUSE) {
       report.hat_byte = hat;
       usb_hid.sendReport(1, &report, sizeof(report));
 
-      int8_t paddle_data = x_axis; 
-      usb_hid.sendReport(2, &paddle_data, sizeof(paddle_data));
+      // int8_t paddle_data = x_axis; 
+      // usb_hid.sendReport(2, &paddle_data, sizeof(paddle_data));
     }
   }
 
