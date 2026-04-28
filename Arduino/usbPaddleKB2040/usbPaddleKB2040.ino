@@ -78,6 +78,16 @@ uint8_t const desc_ps4[] = {
   0xc0
 };
 
+// --- 4. MOUSE DESCRIPTOR (Absolute Mapping for Deck) ---
+uint8_t const desc_mouse[] = {
+  0x05, 0x01, 0x09, 0x02, 0xa1, 0x01, 0x09, 0x01, 0xa1, 0x00,
+  0x05, 0x09, 0x19, 0x01, 0x29, 0x03, 0x15, 0x00, 0x25, 0x01, 0x75, 0x01, 0x95, 0x03, 0x81, 0x02, // 3 Buttons
+  0x75, 0x05, 0x95, 0x01, 0x81, 0x01, // Padding
+  0x05, 0x01, 0x09, 0x30, 0x15, 0x81, 0x25, 0x7f, 0x75, 0x08, 0x95, 0x01, 0x81, 0x02, // X Axis
+  0x09, 0x31, 0x15, 0x81, 0x25, 0x7f, 0x75, 0x08, 0x95, 0x01, 0x81, 0x02, // Y Axis
+  0xc0, 0xc0
+};
+
 Adafruit_USBD_HID usb_hid;
 
 // Define Pins
@@ -103,7 +113,7 @@ Adafruit_USBD_HID usb_hid;
 #define PADDLE_DPAD_HAT_LEFT      6
 #define PADDLE_DPAD_HAT_CENTERED  8
 
-enum { MODE_NORMAL, MODE_XINPUT, MODE_PS4 };
+enum { MODE_NORMAL, MODE_XINPUT, MODE_PS4, MODE_MOUSE };
 int currentMode = MODE_NORMAL;
 
 typedef struct TU_ATTR_PACKED {
@@ -131,7 +141,7 @@ void setup() {
 
   delay(50); // Debounce
 
-if (digitalRead(BTN_SELECT) == LOW) {
+  if (digitalRead(BTN_SELECT) == LOW) {
     currentMode = MODE_XINPUT;
     TinyUSBDevice.setID(0x045E, 0x028E); 
     usb_hid.setReportDescriptor(desc_xinput, sizeof(desc_xinput));
@@ -141,6 +151,11 @@ if (digitalRead(BTN_SELECT) == LOW) {
     TinyUSBDevice.setID(0x054C, 0x05C4); 
     usb_hid.setReportDescriptor(desc_ps4, sizeof(desc_ps4));
     pixel.setPixelColor(0, 0, 0, 32); // Blue
+  } else if (digitalRead(BTN_X) == LOW) {
+    currentMode = MODE_MOUSE;
+    TinyUSBDevice.setID(0x046D, 0xC077); // Logitech Mouse Spoof
+    usb_hid.setReportDescriptor(desc_mouse, sizeof(desc_mouse));
+    pixel.setPixelColor(0, 32, 32, 0); // Yellow
   } else {
     currentMode = MODE_NORMAL;
     TinyUSBDevice.setID(0x239A, 0x8108);
@@ -154,10 +169,7 @@ if (digitalRead(BTN_SELECT) == LOW) {
 
   usb_hid.setPollInterval(2);
   usb_hid.begin();
-
   analogReadResolution(12);
-
-  // Set the callback for receiving data FROM the host (Mac/PC/Handheld)
   usb_hid.setReportCallback(NULL, hid_out_report_cb);
 }
 
@@ -199,6 +211,14 @@ if (currentMode == MODE_XINPUT) {
   else if (currentMode == MODE_PS4) {
     struct { uint8_t x; uint16_t btns; } rep = { ps4_axis, (uint16_t)buttons };
     usb_hid.sendReport(0, &rep, sizeof(rep));
+  } else if (currentMode == MODE_MOUSE) {
+    // Mouse Report: Buttons (Byte 0), X (Byte 1), Y (Byte 2)
+    uint8_t m_btns = 0;
+    if (!digitalRead(BTN_A)) m_btns |= 0x01; // Left Click
+    if (!digitalRead(BTN_B)) m_btns |= 0x02; // Right Click
+    
+    struct { uint8_t btns; int8_t x; int8_t y; } m_rep = { m_btns, x_axis, 0 };
+    usb_hid.sendReport(0, &m_rep, sizeof(m_rep));
   }
   else {
     // Normal Mode: Send both Anbernic (ID 1) and Steam Deck (ID 2)
