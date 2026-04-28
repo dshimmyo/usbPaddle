@@ -78,14 +78,34 @@ uint8_t const desc_ps4[] = {
   0xc0
 };
 
-// --- 4. MOUSE DESCRIPTOR (Absolute Mapping for Deck) ---
-uint8_t const desc_mouse[] = {
-  0x05, 0x01, 0x09, 0x02, 0xa1, 0x01, 0x09, 0x01, 0xa1, 0x00,
-  0x05, 0x09, 0x19, 0x01, 0x29, 0x03, 0x15, 0x00, 0x25, 0x01, 0x75, 0x01, 0x95, 0x03, 0x81, 0x02, // 3 Buttons
-  0x75, 0x05, 0x95, 0x01, 0x81, 0x01, // Padding
-  0x05, 0x01, 0x09, 0x30, 0x15, 0x81, 0x25, 0x7f, 0x75, 0x08, 0x95, 0x01, 0x81, 0x02, // X Axis
-  0x09, 0x31, 0x15, 0x81, 0x25, 0x7f, 0x75, 0x08, 0x95, 0x01, 0x81, 0x02, // Y Axis
-  0xc0, 0xc0
+// --- 4. ABSOLUTE MOUSE DESCRIPTOR ---
+uint8_t const desc_mouse_abs[] = {
+  0x05, 0x01,        // Usage Page (Generic Desktop)
+  0x09, 0x02,        // Usage (Mouse)
+  0xA1, 0x01,        // Collection (Application)
+    0x09, 0x01,      //   Usage (Pointer)
+    0xA1, 0x00,      //   Collection (Physical)
+      0x05, 0x09,    //     Usage Page (Button)
+      0x19, 0x01,    //     Usage Minimum (1)
+      0x29, 0x03,    //     Usage Maximum (3)
+      0x15, 0x00,    //     Logical Minimum (0)
+      0x25, 0x01,    //     Logical Maximum (1)
+      0x95, 0x03,    //     Report Count (3)
+      0x75, 0x01,    //     Report Size (1)
+      0x81, 0x02,    //     Input (Data, Var, Abs)
+      0x95, 0x01,    //     Report Count (1)
+      0x75, 0x05,    //     Report Size (5)
+      0x81, 0x03,    //     Input (Const, Var, Abs) - Padding
+      0x05, 0x01,    //     Usage Page (Generic Desktop)
+      0x09, 0x30,    //     Usage (X)
+      0x09, 0x31,    //     Usage (Y)
+      0x15, 0x00,    //     Logical Minimum (0)
+      0x26, 0xFF, 0x7F,// Logical Maximum (32767) for high precision
+      0x75, 0x10,    //     Report Size (16 bits)
+      0x95, 0x02,    //     Report Count (2)
+      0x81, 0x02,    //     Input (Data, Var, Abs)
+    0xC0,
+  0xC0
 };
 
 Adafruit_USBD_HID usb_hid;
@@ -153,8 +173,8 @@ void setup() {
     pixel.setPixelColor(0, 0, 0, 32); // Blue
   } else if (digitalRead(BTN_X) == LOW) {
     currentMode = MODE_MOUSE;
-    TinyUSBDevice.setID(0x046D, 0xC077); // Logitech Mouse Spoof
-    usb_hid.setReportDescriptor(desc_mouse, sizeof(desc_mouse));
+    TinyUSBDevice.setID(0x046D, 0xC077); // Logitech Mouse
+    usb_hid.setReportDescriptor(desc_mouse_abs, sizeof(desc_mouse_abs));
     pixel.setPixelColor(0, 32, 32, 0); // Yellow
   } else {
     currentMode = MODE_NORMAL;
@@ -182,55 +202,76 @@ void loop() {
 
   // 1. Paddle (X-Axis)
   int rawValue = analogRead(POT_PIN);
-  int8_t x_axis = map(rawValue, 0, 4095, -127, 127);
-  uint8_t ps4_axis = map(rawValue, 0, 4095, 0, 255);
-
-  // 2. D-Pad (The Hat)
-  uint8_t hat = PADDLE_DPAD_HAT_CENTERED;
-  if      (!digitalRead(BTN_UP))    hat = PADDLE_DPAD_HAT_UP;
-  else if (!digitalRead(BTN_DOWN))  hat = PADDLE_DPAD_HAT_DOWN;
-  else if (!digitalRead(BTN_LEFT))  hat = PADDLE_DPAD_HAT_LEFT;
-  else if (!digitalRead(BTN_RIGHT)) hat = PADDLE_DPAD_HAT_RIGHT;
-
-  // 3. Native Anbernic/RetroArch Mapping
-  uint32_t buttons = 0;
-  
-  // Mapping your pins to your discovered indices
-  if (!digitalRead(BTN_A))      buttons |= (1 << 4);  // Anbernic A Nintendo A
-  if (!digitalRead(BTN_B))      buttons |= (1 << 3);  // Anbernic B Nintendo B
-  if (!digitalRead(BTN_X))      buttons |= (1 << 6);  // Anbernic X
-  if (!digitalRead(BTN_Y))      buttons |= (1 << 5);  // Anbernic Y
-  if (!digitalRead(BTN_SELECT)) buttons |= (1 << 9);  // Anbernic Select
-  if (!digitalRead(BTN_START))  buttons |= (1 << 10); // Anbernic Start
-  if (!digitalRead(BTN_MENU))   buttons |= (1 << 11); // Anbernic Menu (Press)
-  
-if (currentMode == MODE_XINPUT) {
-    struct { int8_t x; uint16_t btns; } rep = { x_axis, (uint16_t)buttons };
-    usb_hid.sendReport(0, &rep, sizeof(rep));
-  } 
-  else if (currentMode == MODE_PS4) {
-    struct { uint8_t x; uint16_t btns; } rep = { ps4_axis, (uint16_t)buttons };
-    usb_hid.sendReport(0, &rep, sizeof(rep));
-  } else if (currentMode == MODE_MOUSE) {
-    // Mouse Report: Buttons (Byte 0), X (Byte 1), Y (Byte 2)
+if (currentMode == MODE_MOUSE) {
+    // 1. Map to high-res absolute coordinates (0 to 32767)
+    int32_t current_x = map(rawValue, 0, 4095, 0, 32767);
+    
     uint8_t m_btns = 0;
     if (!digitalRead(BTN_A)) m_btns |= 0x01; // Left Click
     if (!digitalRead(BTN_B)) m_btns |= 0x02; // Right Click
-    
-    struct { uint8_t btns; int8_t x; int8_t y; } m_rep = { m_btns, x_axis, 0 };
-    usb_hid.sendReport(0, &m_rep, sizeof(m_rep));
-  }
-  else {
-    // Normal Mode: Send both Anbernic (ID 1) and Steam Deck (ID 2)
-    dks_report_t report;
-    memset(&report, 0, sizeof(report));
-    report.x       = x_axis;
-    report.buttons = buttons;
-    report.hat_byte = hat;
-    usb_hid.sendReport(1, &report, sizeof(report));
 
-    int8_t paddle_data = x_axis; 
-    usb_hid.sendReport(2, &paddle_data, sizeof(paddle_data));
+    // State tracking for the silence filter
+    static int32_t last_mouse_x = -1;
+    static uint8_t last_mouse_btns = 0xFF;
+
+    // 2. The Deadband: Only send if moved by > 50 units, or if a button was pressed/released
+    if (abs(current_x - last_mouse_x) > 50 || m_btns != last_mouse_btns) {
+      
+      struct TU_ATTR_PACKED {
+        uint8_t btns;
+        int16_t x;
+        int16_t y;
+      } m_rep = { m_btns, (int16_t)current_x, 16384 }; // Y is locked to screen center
+
+      usb_hid.sendReport(0, &m_rep, sizeof(m_rep));
+      
+      last_mouse_x = current_x;
+      last_mouse_btns = m_btns;
+    }
+  } else {
+
+    int8_t x_axis = map(rawValue, 0, 4095, -127, 127);
+    uint8_t ps4_axis = map(rawValue, 0, 4095, 0, 255);
+
+    // 2. D-Pad (The Hat)
+    uint8_t hat = PADDLE_DPAD_HAT_CENTERED;
+    if      (!digitalRead(BTN_UP))    hat = PADDLE_DPAD_HAT_UP;
+    else if (!digitalRead(BTN_DOWN))  hat = PADDLE_DPAD_HAT_DOWN;
+    else if (!digitalRead(BTN_LEFT))  hat = PADDLE_DPAD_HAT_LEFT;
+    else if (!digitalRead(BTN_RIGHT)) hat = PADDLE_DPAD_HAT_RIGHT;
+
+    // 3. Native Anbernic/RetroArch Mapping
+    uint32_t buttons = 0;
+    
+    // Mapping your pins to your discovered indices
+    if (!digitalRead(BTN_A))      buttons |= (1 << 4);  // Anbernic A Nintendo A
+    if (!digitalRead(BTN_B))      buttons |= (1 << 3);  // Anbernic B Nintendo B
+    if (!digitalRead(BTN_X))      buttons |= (1 << 6);  // Anbernic X
+    if (!digitalRead(BTN_Y))      buttons |= (1 << 5);  // Anbernic Y
+    if (!digitalRead(BTN_SELECT)) buttons |= (1 << 9);  // Anbernic Select
+    if (!digitalRead(BTN_START))  buttons |= (1 << 10); // Anbernic Start
+    if (!digitalRead(BTN_MENU))   buttons |= (1 << 11); // Anbernic Menu (Press)
+    
+  if (currentMode == MODE_XINPUT) {
+      struct { int8_t x; uint16_t btns; } rep = { x_axis, (uint16_t)buttons };
+      usb_hid.sendReport(0, &rep, sizeof(rep));
+    } 
+    else if (currentMode == MODE_PS4) {
+      struct { uint8_t x; uint16_t btns; } rep = { ps4_axis, (uint16_t)buttons };
+      usb_hid.sendReport(0, &rep, sizeof(rep));
+    } 
+    else {
+      // Normal Mode: Send both Anbernic (ID 1) and Steam Deck (ID 2)
+      dks_report_t report;
+      memset(&report, 0, sizeof(report));
+      report.x       = x_axis;
+      report.buttons = buttons;
+      report.hat_byte = hat;
+      usb_hid.sendReport(1, &report, sizeof(report));
+
+      int8_t paddle_data = x_axis; 
+      usb_hid.sendReport(2, &paddle_data, sizeof(paddle_data));
+    }
   }
 
   delay(10);
