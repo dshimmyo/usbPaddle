@@ -11,10 +11,12 @@ uint8_t const desc_normal[] = {
       0x05, 0x01,    //     Usage Page (Generic Desktop)
       0x09, 0x30,    //     Usage (X)
       0x09, 0x31,    //     Usage (Y)
+      0x09, 0x32,    //     Usage (Z)
+      0x09, 0x35,    //     Usage (Rz / Rotate Z)
       0x15, 0x81,    //     Logical Minimum (-127)
       0x25, 0x7f,    //     Logical Maximum (127)
       0x75, 0x08,    //     Report Size (8 bits)
-      0x95, 0x02,    //     Report Count (2)
+      0x95, 0x04,    //     Report Count (4)
       0x81, 0x02,    //     Input (Data, Var, Abs)
     0xc0,            //   End Physical Collection
     0x05, 0x09,      //   Usage Page (Button)
@@ -45,10 +47,10 @@ uint8_t const desc_normal[] = {
 Adafruit_USBD_HID usb_hid;
 
 // Define Pins
-#define POT_PIN 26 //A0
-#define POT_PIN1 27 //A1
-#define POT_PIN2 28 //A2
-#define POT_PIN3 29 //A3
+#define POT_PIN1 26 //A0
+#define POT_PIN2 27 //A1
+#define POT_PIN3 28 //A2
+#define POT_PIN4 29 //A3
 #define BTN_UP 3
 #define BTN_DOWN 4
 #define BTN_LEFT 5
@@ -73,8 +75,10 @@ Adafruit_USBD_HID usb_hid;
 #define PADDLE_DPAD_HAT_CENTERED  8
 
 typedef struct TU_ATTR_PACKED {
-  int8_t  x;
-  int8_t  y;
+  int8_t  p1;         // Paddle 1 (X)
+  int8_t  p2;         // Paddle 2 (Y)
+  int8_t  p3;         // Paddle 3 (Z)
+  int8_t  p4;         // Paddle 4 (Rz)
   uint32_t buttons;
   uint8_t hat_byte;
 } dks_report_t;
@@ -97,10 +101,10 @@ void setup() {
   pinMode(BTN_R1, INPUT_PULLUP);
   pinMode(BTN_L2, INPUT_PULLUP);
   pinMode(BTN_R2, INPUT_PULLUP);
-  pinMode(POT_PIN, INPUT_PULLDOWN); // (ADC)
   pinMode(POT_PIN1, INPUT_PULLDOWN); // (ADC)
   pinMode(POT_PIN2, INPUT_PULLDOWN); // (ADC)
   pinMode(POT_PIN3, INPUT_PULLDOWN); // (ADC)
+  pinMode(POT_PIN4, INPUT_PULLDOWN); // (ADC)
 
   delay(50); // Debounce
 
@@ -118,13 +122,29 @@ void setup() {
 void loop() {
   if (!usb_hid.ready()) return;
 
-  // 1. Paddle (X-Axis)
-  int rawValue = analogRead(POT_PIN);
-
-  int8_t x_axis = map(rawValue, 0, 4095, -127, 127);
-
-  if (rawValue < 5) { //needs a pulldown
-      x_axis = 0; //center when disconnected
+  // Paddle1
+  int rawValue1 = analogRead(POT_PIN1);
+  int8_t p1_axis = map(rawValue1, 0, 4095, -127, 127);
+  if (rawValue1 < 5) { //needs a pulldown
+      p1_axis = 0; //center when disconnected
+  }
+  // Paddle2
+  int rawValue2 = analogRead(POT_PIN2);
+  int8_t p2_axis = map(rawValue2, 0, 4095, -127, 127);
+  if (rawValue2 < 5) { //needs a pulldown
+      p2_axis = 0; //center when disconnected
+  }
+  // Paddle3
+  int rawValue3 = analogRead(POT_PIN3);
+  int8_t p3_axis = map(rawValue3, 0, 4095, -127, 127);
+  if (rawValue3 < 5) { //needs a pulldown
+      p3_axis = 0; //center when disconnected
+  }
+  // Paddle4
+  int rawValue4 = analogRead(POT_PIN4);
+  int8_t p4_axis = map(rawValue4, 0, 4095, -127, 127);
+  if (rawValue4 < 5) { //needs a pulldown
+      p4_axis = 0; //center when disconnected
   }
 
   // 2. D-Pad (The Hat)
@@ -151,7 +171,10 @@ void loop() {
   
   dks_report_t report;
   memset(&report, 0, sizeof(report));
-  report.x       = x_axis;
+  report.p1       = p1_axis;
+  report.p2       = p2_axis;
+  report.p3       = p3_axis;
+  report.p4       = p4_axis;
   report.buttons = buttons;
   report.hat_byte = hat;
   usb_hid.sendReport(1, &report, sizeof(report));
