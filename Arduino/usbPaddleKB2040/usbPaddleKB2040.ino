@@ -1,7 +1,7 @@
 #include "Adafruit_TinyUSB.h"
 
 uint8_t const desc_normal[] = { 
-  // Collection 1: Standard Gamepad for Anbernic (ID 1) //Composite HID (Absolute) profile settings
+  // Collection 1: Standard Gamepad (Xbox/XInput Baseline)
   0x05, 0x01,        // Usage Page (Generic Desktop)
   0x09, 0x05,        // Usage (Game Pad)
   0xa1, 0x01,        // Collection (Application)
@@ -104,11 +104,6 @@ void setup() {
   usb_hid.setPollInterval(2);
   usb_hid.begin();
   analogReadResolution(12);
-  usb_hid.setReportCallback(NULL, hid_out_report_cb);
-}
-
-void hid_out_report_cb(uint8_t report_id, hid_report_type_t report_type, uint8_t const* buffer, uint16_t bufsize) {
-  digitalWrite(LED_BUILTIN, HIGH); 
 }
 
 void loop() {
@@ -118,7 +113,6 @@ void loop() {
   int rawValue = analogRead(POT_PIN);
 
   int8_t x_axis = map(rawValue, 0, 4095, -127, 127);
-  uint8_t ps4_axis = map(rawValue, 0, 4095, 0, 255);
 
   if (rawValue < 5) { //needs a pulldown
       x_axis = 0; //center when disconnected
@@ -131,17 +125,16 @@ void loop() {
   else if (!digitalRead(BTN_LEFT))  hat = PADDLE_DPAD_HAT_LEFT;
   else if (!digitalRead(BTN_RIGHT)) hat = PADDLE_DPAD_HAT_RIGHT;
 
-  // 3. Native Anbernic/RetroArch Mapping
+  // 3. Standard Xbox/XInput Mapping
   uint32_t buttons = 0;
   
-  // Mapping your pins to your discovered indices
-  if (!digitalRead(BTN_A))      buttons |= (1 << 4);  // Anbernic A Nintendo A
-  if (!digitalRead(BTN_B))      buttons |= (1 << 3);  // Anbernic B Nintendo B
-  if (!digitalRead(BTN_X))      buttons |= (1 << 6);  // Anbernic X
-  if (!digitalRead(BTN_Y))      buttons |= (1 << 5);  // Anbernic Y
-  if (!digitalRead(BTN_SELECT)) buttons |= (1 << 9);  // Anbernic Select
-  if (!digitalRead(BTN_START))  buttons |= (1 << 10); // Anbernic Start
-  if (!digitalRead(BTN_MENU))   buttons |= (1 << 11); // Anbernic Menu (Press)
+  if (!digitalRead(BTN_A))      buttons |= (1 << 0);  // A (Bottom)
+  if (!digitalRead(BTN_B))      buttons |= (1 << 1);  // B (Right)
+  if (!digitalRead(BTN_X))      buttons |= (1 << 2);  // X (Left)
+  if (!digitalRead(BTN_Y))      buttons |= (1 << 3);  // Y (Top)
+  if (!digitalRead(BTN_SELECT)) buttons |= (1 << 6);  // Back/Select
+  if (!digitalRead(BTN_START))  buttons |= (1 << 7);  // Start
+  if (!digitalRead(BTN_MENU))   buttons |= (1 << 10); // Guide/Menu
   
   dks_report_t report;
   memset(&report, 0, sizeof(report));
