@@ -184,8 +184,8 @@ void setup() {
   }
   pixel.show();
 
-  TinyUSBDevice.setManufacturerDescriptor("DKS Interactive LLC");
-  TinyUSBDevice.setProductDescriptor("DKS Paddle v0");
+  TinyUSBDevice.setManufacturerDescriptor("OSHP");
+  TinyUSBDevice.setProductDescriptor("HAQ-Pad");
 
   usb_hid.setPollInterval(2);
   usb_hid.begin();
