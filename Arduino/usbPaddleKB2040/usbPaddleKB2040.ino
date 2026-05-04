@@ -45,21 +45,21 @@ uint8_t const desc_normal[] = {
 Adafruit_USBD_HID usb_hid;
 
 // Define Pins
-#define POT_PIN A0
-#define POT_PIN1 A1 //saving for later
-#define POT_PIN2 A2 //saving for later
-#define POT_PIN3 A3 //saving for later
+#define POT_PIN 26 //A0
+#define POT_PIN1 27 //A1
+#define POT_PIN2 28 //A2
+#define POT_PIN3 29 //A3
 #define BTN_UP 3
 #define BTN_DOWN 4
 #define BTN_LEFT 5
 #define BTN_RIGHT 6
-#define BTN_A 8 //7 (right)
-#define BTN_B 7 //8 (left)
+#define BTN_A 2 //down//7 (right)
+#define BTN_B 7 //right//8 (left)
 #define BTN_SELECT 9
-#define BTN_START 10
+#define BTN_START 10// underside of RP2040
 #define BTN_MENU 0 
-#define BTN_X 2 //up 1
-#define BTN_Y 1 //left 2
+#define BTN_X 8//left //up 1
+#define BTN_Y 1//up //down 2
 
 #define PADDLE_DPAD_HAT_UP        0
 #define PADDLE_DPAD_HAT_RIGHT     2
