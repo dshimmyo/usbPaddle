@@ -158,6 +158,10 @@ void setup() {
   pinMode(BTN_MENU, INPUT_PULLUP);
   pinMode(BTN_X, INPUT_PULLUP);
   pinMode(BTN_Y, INPUT_PULLUP);
+  pinMode(POT_PIN, INPUT_PULLDOWN); // (ADC)
+  pinMode(POT_PIN1, INPUT_PULLDOWN); // (ADC)
+  pinMode(POT_PIN2, INPUT_PULLDOWN); // (ADC)
+  pinMode(POT_PIN3, INPUT_PULLDOWN); // (ADC)
 
   delay(50); // Debounce
 
@@ -233,6 +237,10 @@ if (currentMode == MODE_MOUSE) {
     int8_t x_axis = map(rawValue, 0, 4095, -127, 127);
     uint8_t ps4_axis = map(rawValue, 0, 4095, 0, 255);
 
+      if (rawValue < 5) { //needs a pulldown
+          x_axis = 0; //center when disconnected
+      }
+
     // 2. D-Pad (The Hat)
     uint8_t hat = PADDLE_DPAD_HAT_CENTERED;
     if      (!digitalRead(BTN_UP))    hat = PADDLE_DPAD_HAT_UP;
@@ -269,8 +277,6 @@ if (currentMode == MODE_MOUSE) {
       report.hat_byte = hat;
       usb_hid.sendReport(1, &report, sizeof(report));
 
-      // int8_t paddle_data = x_axis; 
-      // usb_hid.sendReport(2, &paddle_data, sizeof(paddle_data));
     }
   }
 
