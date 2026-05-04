@@ -42,7 +42,6 @@ uint8_t const desc_normal[] = {
 
 };
 
-
 Adafruit_USBD_HID usb_hid;
 
 // Define Pins
@@ -54,13 +53,13 @@ Adafruit_USBD_HID usb_hid;
 #define BTN_DOWN 4
 #define BTN_LEFT 5
 #define BTN_RIGHT 6
-#define BTN_A 7 //outside (right)
-#define BTN_B 8 //inside (left)
+#define BTN_A 8 //7 (right)
+#define BTN_B 7 //8 (left)
 #define BTN_SELECT 9
 #define BTN_START 10
-#define BTN_MENU 0 //move to 11 on stemmaQT of KB2040
-#define BTN_X 1 //move to 12 on stemmaQT of KB2040
-#define BTN_Y 2
+#define BTN_MENU 0 
+#define BTN_X 2 //up 1
+#define BTN_Y 1 //left 2
 
 #define PADDLE_DPAD_HAT_UP        0
 #define PADDLE_DPAD_HAT_RIGHT     2
@@ -77,7 +76,6 @@ typedef struct TU_ATTR_PACKED {
 
 
 void setup() {
-  //pixel.begin();
 
   pinMode(BTN_UP, INPUT_PULLUP);
   pinMode(BTN_DOWN, INPUT_PULLUP);
