@@ -57,6 +57,11 @@ Adafruit_USBD_HID usb_hid;
 #define BTN_B 7 //right//8 (left)
 #define BTN_SELECT 9
 #define BTN_START 10// underside of RP2040
+#define BTN_L1 11
+#define BTN_R1 12
+#define BTN_L2 13
+#define BTN_R2 14
+
 #define BTN_MENU 0 
 #define BTN_X 8//left //up 1
 #define BTN_Y 1//up //down 2
@@ -88,6 +93,10 @@ void setup() {
   pinMode(BTN_MENU, INPUT_PULLUP);
   pinMode(BTN_X, INPUT_PULLUP);
   pinMode(BTN_Y, INPUT_PULLUP);
+  pinMode(BTN_L1, INPUT_PULLUP);
+  pinMode(BTN_R1, INPUT_PULLUP);
+  pinMode(BTN_L2, INPUT_PULLUP);
+  pinMode(BTN_R2, INPUT_PULLUP);
   pinMode(POT_PIN, INPUT_PULLDOWN); // (ADC)
   pinMode(POT_PIN1, INPUT_PULLDOWN); // (ADC)
   pinMode(POT_PIN2, INPUT_PULLDOWN); // (ADC)
@@ -132,8 +141,12 @@ void loop() {
   if (!digitalRead(BTN_B))      buttons |= (1 << 1);  // B (Right)
   if (!digitalRead(BTN_X))      buttons |= (1 << 2);  // X (Left)
   if (!digitalRead(BTN_Y))      buttons |= (1 << 3);  // Y (Top)
-  if (!digitalRead(BTN_SELECT)) buttons |= (1 << 6);  // Back/Select
+  if (!digitalRead(BTN_L1))     buttons |= (1 << 4);  // Left Bumper
+  if (!digitalRead(BTN_R1))     buttons |= (1 << 5);  // Right Bumper
+  if (!digitalRead(BTN_SELECT)) buttons |= (1 << 6);  // Select/Back
   if (!digitalRead(BTN_START))  buttons |= (1 << 7);  // Start
+  if (!digitalRead(BTN_L2))     buttons |= (1 << 8);  // Left Trigger
+  if (!digitalRead(BTN_R2))     buttons |= (1 << 9);  // Right Trigger
   if (!digitalRead(BTN_MENU))   buttons |= (1 << 10); // Guide/Menu
   
   dks_report_t report;
