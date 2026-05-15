@@ -2751,7 +2751,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "2466a868-352e-4433-9fd9-2180200c72af")
-		(property "Reference" "R3"
+		(property "Reference" "R2"
 			(at 69.85 36.8299 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2815,7 +2815,7 @@
 		(instances
 			(project "usbPaddleKicad"
 				(path "/9df66249-2397-46fa-b5bf-6d1617684761"
-					(reference "R3")
+					(reference "R2")
 					(unit 1)
 				)
 			)
@@ -2993,7 +2993,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "7d9ee010-2cc8-4b02-a80a-fbaff75a4ee8")
-		(property "Reference" "U2"
+		(property "Reference" "U1"
 			(at 138.43 59.69 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3252,7 +3252,7 @@
 		(instances
 			(project "usbPaddleKicad"
 				(path "/9df66249-2397-46fa-b5bf-6d1617684761"
-					(reference "U2")
+					(reference "U1")
 					(unit 1)
 				)
 			)
@@ -3270,7 +3270,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "86e112e6-7067-47d9-99fc-aa2609ca2410")
-		(property "Reference" "U1"
+		(property "Reference" "U2"
 			(at 196.9355 43.18 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3434,7 +3434,7 @@
 		(instances
 			(project "usbPaddleKicad"
 				(path "/9df66249-2397-46fa-b5bf-6d1617684761"
-					(reference "U1")
+					(reference "U2")
 					(unit 1)
 				)
 			)
@@ -3452,7 +3452,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "8845b30f-514c-4012-aef2-6873ec1c01a1")
-		(property "Reference" "R1"
+		(property "Reference" "R4"
 			(at 90.17 36.8299 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3516,7 +3516,7 @@
 		(instances
 			(project "usbPaddleKicad"
 				(path "/9df66249-2397-46fa-b5bf-6d1617684761"
-					(reference "R1")
+					(reference "R4")
 					(unit 1)
 				)
 			)
@@ -3534,7 +3534,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "8cf7b98a-e469-4bba-bafc-a26bec2f82d2")
-		(property "Reference" "R2"
+		(property "Reference" "R3"
 			(at 80.01 36.8299 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3598,7 +3598,7 @@
 		(instances
 			(project "usbPaddleKicad"
 				(path "/9df66249-2397-46fa-b5bf-6d1617684761"
-					(reference "R2")
+					(reference "R3")
 					(unit 1)
 				)
 			)
@@ -3616,7 +3616,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "bb2a8cf8-5ffb-4a06-aad3-055574cebb95")
-		(property "Reference" "U3"
+		(property "Reference" "U4"
 			(at 196.9355 88.9 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3780,7 +3780,7 @@
 		(instances
 			(project "usbPaddleKicad"
 				(path "/9df66249-2397-46fa-b5bf-6d1617684761"
-					(reference "U3")
+					(reference "U4")
 					(unit 1)
 				)
 			)
@@ -3958,7 +3958,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "e428d7b5-192a-4483-810f-f07191ab8d0a")
-		(property "Reference" "U2"
+		(property "Reference" "U3"
 			(at 196.9355 66.04 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4122,7 +4122,7 @@
 		(instances
 			(project "usbPaddleKicad"
 				(path "/9df66249-2397-46fa-b5bf-6d1617684761"
-					(reference "U2")
+					(reference "U3")
 					(unit 1)
 				)
 			)
@@ -4140,7 +4140,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "e5ff66b7-1106-4e26-a78c-af4cd1d3829f")
-		(property "Reference" "U4"
+		(property "Reference" "U5"
 			(at 196.9355 111.76 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4304,7 +4304,7 @@
 		(instances
 			(project "usbPaddleKicad"
 				(path "/9df66249-2397-46fa-b5bf-6d1617684761"
-					(reference "U4")
+					(reference "U5")
 					(unit 1)
 				)
 			)
@@ -4322,7 +4322,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "f4e50692-d1be-451d-aa09-31929726cbdc")
-		(property "Reference" "R4"
+		(property "Reference" "R1"
 			(at 59.69 36.8299 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4386,7 +4386,7 @@
 		(instances
 			(project "usbPaddleKicad"
 				(path "/9df66249-2397-46fa-b5bf-6d1617684761"
-					(reference "R4")
+					(reference "R1")
 					(unit 1)
 				)
 			)
