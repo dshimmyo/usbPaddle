@@ -661,13 +661,13 @@
         "uuid": "9df66249-2397-46fa-b5bf-6d1617684761"
       }
     ],
-    "used_designators": "",
+    "used_designators": "U1,U3-5,RV1-4",
     "variants": []
   },
   "sheets": [
     [
       "9df66249-2397-46fa-b5bf-6d1617684761",
-      "usbPaddle"
+      "usbPaddleKicad"
     ]
   ],
   "text_variables": {},
