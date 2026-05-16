@@ -4168,6 +4168,58 @@
 			(justify left bottom)
 		)
 	)
+	(gr_text "P1"
+		(at 108.895 83.225 0)
+		(layer "F.SilkS")
+		(uuid "730b0a72-db4e-4be6-a8b1-fdba16417506")
+		(effects
+			(font
+				(size 1.5 1.5)
+				(thickness 0.3)
+				(bold yes)
+			)
+			(justify bottom)
+		)
+	)
+	(gr_text "P2"
+		(at 126.895 83.225 0)
+		(layer "F.SilkS")
+		(uuid "21689b41-3134-4d92-9e86-f9e1dda2d742")
+		(effects
+			(font
+				(size 1.5 1.5)
+				(thickness 0.3)
+				(bold yes)
+			)
+			(justify bottom)
+		)
+	)
+	(gr_text "P3"
+		(at 144.895 83.225 0)
+		(layer "F.SilkS")
+		(uuid "a68a2467-fcac-494d-85ab-637711e2747e")
+		(effects
+			(font
+				(size 1.5 1.5)
+				(thickness 0.3)
+				(bold yes)
+			)
+			(justify bottom)
+		)
+	)
+	(gr_text "P4"
+		(at 162.645 83.225 0)
+		(layer "F.SilkS")
+		(uuid "cd88fd90-b5b7-4051-9804-86ac2146b506")
+		(effects
+			(font
+				(size 1.5 1.5)
+				(thickness 0.3)
+				(bold yes)
+			)
+			(justify bottom)
+		)
+	)
 	(gr_text "WayWayWay"
 		(at 102.395 90.725 0)
 		(layer "B.SilkS")
