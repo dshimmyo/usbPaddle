@@ -1731,7 +1731,7 @@
 		(attr through_hole)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
-			(start -9 -7.63)
+			(start -9 -4.75)
 			(end -9 -2.558)
 			(stroke
 				(width 0.127)
@@ -1742,7 +1742,7 @@
 		)
 		(fp_line
 			(start -9 -2.558)
-			(end -9 8.854)
+			(end -9 7)
 			(stroke
 				(width 0.127)
 				(type solid)
@@ -1751,8 +1751,8 @@
 			(uuid "48f26453-dfd1-4252-b508-86f58a561057")
 		)
 		(fp_line
-			(start -9 8.854)
-			(end 8 8.854)
+			(start -8.5 7)
+			(end 7.5 7)
 			(stroke
 				(width 0.127)
 				(type solid)
@@ -1761,8 +1761,8 @@
 			(uuid "8e51c869-46fe-496a-be1c-5d69db51e72e")
 		)
 		(fp_line
-			(start -8.5 6.323)
-			(end 7.5 6.323)
+			(start -7.456 -4.75)
+			(end -9 -4.75)
 			(stroke
 				(width 0.127)
 				(type solid)
@@ -1771,8 +1771,8 @@
 			(uuid "2a0edf10-118e-498e-b302-d26bbfb70795")
 		)
 		(fp_line
-			(start -7.456 -7.63)
-			(end -9 -7.63)
+			(start 8 -4.75)
+			(end -7.456 -4.75)
 			(stroke
 				(width 0.127)
 				(type solid)
@@ -1781,8 +1781,8 @@
 			(uuid "6a528e39-f2e3-47e5-a1b7-c90b5e29be2a")
 		)
 		(fp_line
-			(start 8 -7.63)
-			(end -7.456 -7.63)
+			(start 8 7)
+			(end 8 -4.75)
 			(stroke
 				(width 0.127)
 				(type solid)
@@ -1790,28 +1790,18 @@
 			(layer "F.SilkS")
 			(uuid "8cfa5441-21aa-42c7-a6a4-a19bf25473a3")
 		)
-		(fp_line
-			(start 8 8.854)
-			(end 8 -7.63)
-			(stroke
-				(width 0.127)
-				(type solid)
-			)
-			(layer "F.SilkS")
-			(uuid "a31dd705-dc17-4f3f-a82a-5f777c6bb615")
-		)
 		(pad "" np_thru_hole circle
 			(at -6.5 3.148)
 			(size 3.2 3.2)
 			(drill 2.5)
-			(layers "*.Cu" "*.Mask")
+			(layers "*.Mask")
 			(uuid "75dec379-1fd8-4301-8767-e6f6f29d49b6")
 		)
 		(pad "" np_thru_hole circle
 			(at 5.5 3.148)
 			(size 3.2 3.2)
 			(drill 2.5)
-			(layers "*.Cu" "*.Mask")
+			(layers "*.Mask")
 			(uuid "28516dec-fa69-44ba-bf2b-a1b9a7ead579")
 		)
 		(pad "1" thru_hole rect
@@ -2476,16 +2466,10 @@
 		(path "/e428d7b5-192a-4483-810f-f07191ab8d0a")
 		(sheetname "/")
 		(sheetfile "usbPaddleKicad.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2" "3" "4")
-			)
-		)
 		(attr through_hole)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
-			(start -9 -7.63)
+			(start -9 -4.75)
 			(end -9 -2.558)
 			(stroke
 				(width 0.127)
@@ -2496,7 +2480,7 @@
 		)
 		(fp_line
 			(start -9 -2.558)
-			(end -9 8.854)
+			(end -9 7)
 			(stroke
 				(width 0.127)
 				(type solid)
@@ -2505,38 +2489,8 @@
 			(uuid "bc557a06-7e3d-45fb-8ff6-1c0e5a872fd1")
 		)
 		(fp_line
-			(start -9 8.854)
-			(end 8 8.854)
-			(stroke
-				(width 0.127)
-				(type solid)
-			)
-			(layer "F.SilkS")
-			(uuid "8a8acd67-eeac-4a44-a06d-e4284ea34bba")
-		)
-		(fp_line
-			(start -8.5 6.323)
-			(end 7.5 6.323)
-			(stroke
-				(width 0.127)
-				(type solid)
-			)
-			(layer "F.SilkS")
-			(uuid "b82223a2-4cfe-439f-9c5b-6bc68fc49417")
-		)
-		(fp_line
-			(start -7.456 -7.63)
-			(end -9 -7.63)
-			(stroke
-				(width 0.127)
-				(type solid)
-			)
-			(layer "F.SilkS")
-			(uuid "54fd9f44-b60e-4eb4-973d-e595a7a37f18")
-		)
-		(fp_line
-			(start 8 -7.63)
-			(end -7.456 -7.63)
+			(start -8.5 7)
+			(end 7.5 7)
 			(stroke
 				(width 0.127)
 				(type solid)
@@ -2545,27 +2499,47 @@
 			(uuid "a0c3dd96-9915-47f2-90f8-4e51919bc286")
 		)
 		(fp_line
-			(start 8 8.854)
-			(end 8 -7.63)
+			(start -7.456 -4.75)
+			(end -9 -4.75)
 			(stroke
 				(width 0.127)
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "0c2c5897-4e59-4676-961e-099bd12f6c09")
+			(uuid "54fd9f44-b60e-4eb4-973d-e595a7a37f18")
+		)
+		(fp_line
+			(start 8 -4.75)
+			(end -7.456 -4.75)
+			(stroke
+				(width 0.127)
+				(type solid)
+			)
+			(layer "F.SilkS")
+			(uuid "8a8acd67-eeac-4a44-a06d-e4284ea34bba")
+		)
+		(fp_line
+			(start 8 7)
+			(end 8 -4.75)
+			(stroke
+				(width 0.127)
+				(type solid)
+			)
+			(layer "F.SilkS")
+			(uuid "b82223a2-4cfe-439f-9c5b-6bc68fc49417")
 		)
 		(pad "" np_thru_hole circle
 			(at -6.5 3.148)
 			(size 3.2 3.2)
 			(drill 2.5)
-			(layers "*.Cu" "*.Mask")
+			(layers "*.Mask")
 			(uuid "7fec34cc-d39a-46c1-8f83-e6cda63c9bad")
 		)
 		(pad "" np_thru_hole circle
 			(at 5.5 3.148)
 			(size 3.2 3.2)
 			(drill 2.5)
-			(layers "*.Cu" "*.Mask")
+			(layers "*.Mask")
 			(uuid "89a46b27-4ea9-4049-a1e2-2e46adc972a5")
 		)
 		(pad "1" thru_hole rect
@@ -2792,16 +2766,10 @@
 		(path "/bb2a8cf8-5ffb-4a06-aad3-055574cebb95")
 		(sheetname "/")
 		(sheetfile "usbPaddleKicad.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2" "3" "4")
-			)
-		)
 		(attr through_hole)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
-			(start -9 -7.63)
+			(start -9 -4.75)
 			(end -9 -2.558)
 			(stroke
 				(width 0.127)
@@ -2812,7 +2780,7 @@
 		)
 		(fp_line
 			(start -9 -2.558)
-			(end -9 8.854)
+			(end -9 7)
 			(stroke
 				(width 0.127)
 				(type solid)
@@ -2821,18 +2789,8 @@
 			(uuid "4910f7ec-6508-4acc-b2ce-2d5051d077cf")
 		)
 		(fp_line
-			(start -9 8.854)
-			(end 8 8.854)
-			(stroke
-				(width 0.127)
-				(type solid)
-			)
-			(layer "F.SilkS")
-			(uuid "24c51b1e-42da-4e0a-b609-a16e0f7a9c23")
-		)
-		(fp_line
-			(start -8.5 6.323)
-			(end 7.5 6.323)
+			(start -8.5 7)
+			(end 7.5 7)
 			(stroke
 				(width 0.127)
 				(type solid)
@@ -2841,8 +2799,8 @@
 			(uuid "dfbf0eb9-99bc-4bbb-b352-edfb8b7734c6")
 		)
 		(fp_line
-			(start -7.456 -7.63)
-			(end -9 -7.63)
+			(start -7.456 -4.75)
+			(end -9 -4.75)
 			(stroke
 				(width 0.127)
 				(type solid)
@@ -2851,18 +2809,8 @@
 			(uuid "693ea0bb-3265-4b97-bb18-e8e8e7f859bc")
 		)
 		(fp_line
-			(start 8 -7.63)
-			(end -7.456 -7.63)
-			(stroke
-				(width 0.127)
-				(type solid)
-			)
-			(layer "F.SilkS")
-			(uuid "99352715-6238-436a-9c89-fefa80b1bcc2")
-		)
-		(fp_line
-			(start 8 8.854)
-			(end 8 -7.63)
+			(start 8 -4.75)
+			(end -7.456 -4.75)
 			(stroke
 				(width 0.127)
 				(type solid)
@@ -2870,18 +2818,28 @@
 			(layer "F.SilkS")
 			(uuid "eedb7187-c327-4ed2-9d33-eaa0ee3a05f4")
 		)
+		(fp_line
+			(start 8 7)
+			(end 8 -4.75)
+			(stroke
+				(width 0.127)
+				(type solid)
+			)
+			(layer "F.SilkS")
+			(uuid "99352715-6238-436a-9c89-fefa80b1bcc2")
+		)
 		(pad "" np_thru_hole circle
 			(at -6.5 3.148)
 			(size 3.2 3.2)
 			(drill 2.5)
-			(layers "*.Cu" "*.Mask")
+			(layers "*.Mask")
 			(uuid "86ee6817-c54b-42c2-9001-3e45f854e963")
 		)
 		(pad "" np_thru_hole circle
 			(at 5.5 3.148)
 			(size 3.2 3.2)
 			(drill 2.5)
-			(layers "*.Cu" "*.Mask")
+			(layers "*.Mask")
 			(uuid "b8ba012c-50d3-48eb-b6bc-95a8b9fa449e")
 		)
 		(pad "1" thru_hole rect
@@ -3746,16 +3704,10 @@
 		(path "/e5ff66b7-1106-4e26-a78c-af4cd1d3829f")
 		(sheetname "/")
 		(sheetfile "usbPaddleKicad.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2" "3" "4")
-			)
-		)
 		(attr through_hole)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
-			(start -9 -7.63)
+			(start -9 -4.75)
 			(end -9 -2.558)
 			(stroke
 				(width 0.127)
@@ -3766,7 +3718,7 @@
 		)
 		(fp_line
 			(start -9 -2.558)
-			(end -9 8.854)
+			(end -9 7)
 			(stroke
 				(width 0.127)
 				(type solid)
@@ -3775,8 +3727,8 @@
 			(uuid "d6f8415a-f66c-469b-a578-6b8435031c70")
 		)
 		(fp_line
-			(start -9 8.854)
-			(end 8 8.854)
+			(start -8.5 7)
+			(end 7.5 7)
 			(stroke
 				(width 0.127)
 				(type solid)
@@ -3785,8 +3737,8 @@
 			(uuid "7a6837f8-020f-4a01-b813-84f8388f0589")
 		)
 		(fp_line
-			(start -8.5 6.323)
-			(end 7.5 6.323)
+			(start -7.456 -4.75)
+			(end -9 -4.75)
 			(stroke
 				(width 0.127)
 				(type solid)
@@ -3795,8 +3747,8 @@
 			(uuid "27f0b65e-6e7b-42a0-97f5-9fa78e1c378d")
 		)
 		(fp_line
-			(start -7.456 -7.63)
-			(end -9 -7.63)
+			(start 8 -4.75)
+			(end -7.456 -4.75)
 			(stroke
 				(width 0.127)
 				(type solid)
@@ -3805,8 +3757,8 @@
 			(uuid "214ff320-2a4a-4b79-9067-43bda8d33e88")
 		)
 		(fp_line
-			(start 8 -7.63)
-			(end -7.456 -7.63)
+			(start 8 7)
+			(end 8 -4.75)
 			(stroke
 				(width 0.127)
 				(type solid)
@@ -3814,28 +3766,18 @@
 			(layer "F.SilkS")
 			(uuid "db4c55c5-725d-442d-9584-1f1b0a6cf02d")
 		)
-		(fp_line
-			(start 8 8.854)
-			(end 8 -7.63)
-			(stroke
-				(width 0.127)
-				(type solid)
-			)
-			(layer "F.SilkS")
-			(uuid "aeddaa83-6455-4e5a-b21b-75f6f7287c53")
-		)
 		(pad "" np_thru_hole circle
 			(at -6.5 3.148)
 			(size 3.2 3.2)
 			(drill 2.5)
-			(layers "*.Cu" "*.Mask")
+			(layers "*.Mask")
 			(uuid "26562069-bacf-41f4-9e4d-7821a0f17a9b")
 		)
 		(pad "" np_thru_hole circle
 			(at 5.5 3.148)
 			(size 3.2 3.2)
 			(drill 2.5)
-			(layers "*.Cu" "*.Mask")
+			(layers "*.Mask")
 			(uuid "dbdd55a4-da30-473c-804b-dec3b44197ec")
 		)
 		(pad "1" thru_hole rect
