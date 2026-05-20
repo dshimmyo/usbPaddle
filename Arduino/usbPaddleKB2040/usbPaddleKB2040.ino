@@ -3,7 +3,7 @@
 uint8_t const desc_normal[] = { 
   // Collection 1: Standard Gamepad (Xbox/XInput Baseline)
   0x05, 0x01,        // Usage Page (Generic Desktop)
-  0x09, 0x05,        // Usage (Game Pad)
+  0x09, 0x04,        // Usage (Joystick) - Changed from 0x05
   0xa1, 0x01,        // Collection (Application)
     0x85, 0x01,      //   REPORT ID (1) - MUST BE EXPLICIT
     0x09, 0x01,      //   Usage (Pointer)
