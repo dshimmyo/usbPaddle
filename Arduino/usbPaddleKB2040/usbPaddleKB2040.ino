@@ -1,7 +1,7 @@
 #include "Adafruit_TinyUSB.h"
 
 uint8_t const desc_normal[] = { 
-  // Collection 1: Standard Gamepad (Xbox/XInput Baseline)
+  // Collection 1: Standard Joystick Baseline
   0x05, 0x01,        // Usage Page (Generic Desktop)
   0x09, 0x04,        // Usage (Joystick) - Changed from 0x05
   0xa1, 0x01,        // Collection (Application)
@@ -111,8 +111,8 @@ void setup() {
   TinyUSBDevice.setID(0x239A, 0x8108);
   usb_hid.setReportDescriptor(desc_normal, sizeof(desc_normal));
   
-  TinyUSBDevice.setManufacturerDescriptor("OSHP");
-  TinyUSBDevice.setProductDescriptor("HAQ-Pad");
+  TinyUSBDevice.setManufacturerDescriptor("Open-Source");
+  TinyUSBDevice.setProductDescriptor("Paddle Controller");
 
   usb_hid.setPollInterval(2);
   usb_hid.begin();
