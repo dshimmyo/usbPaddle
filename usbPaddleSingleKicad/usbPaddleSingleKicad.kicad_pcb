@@ -151,7 +151,7 @@
 		(descr "113004U 1130A6S 11300DR 1130A8G 1130081 1130A5R 1130AP5 1130AST  D1130C3W D1130C1B D1130C3C D1130C2P Potentiometer, vertical, Alps RK09K Single, https://tech.alpsalpine.com/prod/e/pdf/potentiometer/rotarypotentiometers/rk09k/rk09k.pdf")
 		(tags "Potentiometer vertical Alps RK09K RK09D Single Snapin")
 		(property "Reference" "RV1"
-			(at 6.05 -5.15 270)
+			(at 6.05 -5.15 90)
 			(layer "F.SilkS")
 			(uuid "7cb1ca1d-1f9f-4ffc-a25d-7f76f6fb04e8")
 			(effects
@@ -162,7 +162,7 @@
 			)
 		)
 		(property "Value" "R_Potentiometer"
-			(at 6.05 10.15 270)
+			(at 6.05 10.15 90)
 			(layer "F.Fab")
 			(uuid "2b976a76-4496-4262-8755-b9ab234d42ea")
 			(effects
@@ -462,7 +462,18 @@
 				(xyz 1 1 1)
 			)
 			(rotate
-				(xyz 0 0 0)
+				(xyz -0 -0 -0)
+			)
+		)
+		(model "/Users/dshimmyo/Documents/GitHub/usbPaddle/usbPaddleKicad/ALPS-RK09K.step"
+			(offset
+				(xyz 7 -2.5 -0.25)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz -0 -0 90)
 			)
 		)
 	)
@@ -2315,6 +2326,17 @@
 			)
 			(rotate
 				(xyz 0 0 0)
+			)
+		)
+		(model "/Users/dshimmyo/Documents/GitHub/usbPaddle/usbPaddleKicad/switch.step"
+			(offset
+				(xyz -2.5 -6.15 4.5)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz -90 -0 -0)
 			)
 		)
 	)
