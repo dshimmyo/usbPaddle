@@ -12,7 +12,7 @@ uint8_t const desc_normal[] = {
       0x09, 0x30,    //     Usage (X)
       0x09, 0x31,    //     Usage (Y)
       0x09, 0x32,    //     Usage (Z)
-      0x09, 0x35,    //     Usage (Rz / Rotate Z)
+      0x09, 0x33,    //     Usage (Rx)  <-- Changed from 0x35
       0x15, 0x81,    //     Logical Minimum (-127)
       0x25, 0x7f,    //     Logical Maximum (127)
       0x75, 0x08,    //     Report Size (8 bits)
