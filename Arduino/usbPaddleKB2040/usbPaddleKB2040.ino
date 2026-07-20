@@ -179,5 +179,5 @@ void loop() {
   report.hat_byte = hat;
   usb_hid.sendReport(1, &report, sizeof(report));
 
-  delay(10);
+  //delay(10);
 }
