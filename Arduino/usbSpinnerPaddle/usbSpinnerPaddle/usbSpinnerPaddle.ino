@@ -1,17 +1,14 @@
 #include "Adafruit_TinyUSB.h"
 
 // -----------------------------------------------------------------------------
-// Composite USB HID Descriptor
+// USB HID Descriptors
 // -----------------------------------------------------------------------------
-// Report ID 1: Relative Mouse (For Spinner Mode)
-// Report ID 2: Full Joystick Baseline (From your working Paddle sketch)
-// -----------------------------------------------------------------------------
-uint8_t const desc_composite[] = { 
-  // --- REPORT ID 1: Relative Mouse (Spinner Mode) ---
+
+// Mouse Descriptor (Spinner Mode)
+uint8_t const desc_mouse[] = {
   0x05, 0x01,        // Usage Page (Generic Desktop)
   0x09, 0x02,        // Usage (Mouse)
   0xA1, 0x01,        // Collection (Application)
-    0x85, 0x01,      //   Report ID (1)
     0x09, 0x01,      //   Usage (Pointer)
     0xA1, 0x00,      //   Collection (Physical)
       0x05, 0x01,    //     Usage Page (Generic Desktop)
@@ -22,7 +19,6 @@ uint8_t const desc_composite[] = {
       0x95, 0x01,    //     Report Count (1)
       0x81, 0x06,    //     Input (Data, Var, Rel)
     0xC0,            //   End Physical Collection
-    // Mouse Buttons (Left, Right, Middle)
     0x05, 0x09,      //   Usage Page (Button)
     0x19, 0x01,      //   Usage Minimum (1)
     0x29, 0x03,      //   Usage Maximum (3)
@@ -34,15 +30,16 @@ uint8_t const desc_composite[] = {
     0x75, 0x05,      //   Report Size (5 bits) - Padding
     0x95, 0x01,      //   Report Count (1)
     0x81, 0x01,      //   Input (Const)
-  0xC0,              // End Application Collection
+  0xC0               // End Application Collection
+};
 
-  // --- REPORT ID 2: Joystick Baseline (Your Working Paddle Layout) ---
+// Joystick Descriptor (Virtual Paddle Mode)
+uint8_t const desc_joystick[] = { 
   0x05, 0x01,        // Usage Page (Generic Desktop)
   0x09, 0x04,        // Usage (Joystick)
-  0xA1, 0x01,        // Collection (Application)
-    0x85, 0x02,      //   REPORT ID (2)
+  0xa1, 0x01,        // Collection (Application)
     0x09, 0x01,      //   Usage (Pointer)
-    0xA1, 0x00,      //   Collection (Physical)
+    0xa1, 0x00,      //   Collection (Physical)
       0x05, 0x01,    //     Usage Page (Generic Desktop)
       0x09, 0x30,    //     Usage (X)
       0x09, 0x31,    //     Usage (Y)
@@ -53,7 +50,7 @@ uint8_t const desc_composite[] = {
       0x75, 0x08,    //     Report Size (8 bits)
       0x95, 0x04,    //     Report Count (4)
       0x81, 0x02,    //     Input (Data, Var, Abs)
-    0xC0,            //   End Physical Collection
+    0xc0,            //   End Physical Collection
     0x05, 0x09,      //   Usage Page (Button)
     0x19, 0x01,      //   Usage Minimum (1)
     0x29, 0x20,      //   Usage Maximum (32)
@@ -75,7 +72,7 @@ uint8_t const desc_composite[] = {
     0x75, 0x04,      //   Report Size (4 bits) - Padding
     0x95, 0x01,      //   Report Count (1)
     0x81, 0x01,      //   Input (Const)
-  0xC0,              // End Application Collection
+  0xc0               // End Collection (Application)
 };
 
 Adafruit_USBD_HID usb_hid;
@@ -86,15 +83,17 @@ Adafruit_USBD_HID usb_hid;
 #define ENCODER_PIN_A   0  // EC11 Phase A
 #define ENCODER_PIN_B   1  // EC11 Phase B
 #define ENCODER_BTN     2  // EC11 Push Switch
-#define MODE_SWITCH_PIN 15 // Mode Toggle (HIGH = Spinner, LOW = Paddle)
+#define MODE_SWITCH_PIN 15 // Mode Toggle sampled ONCE at startup
+#define SENSITIVITY_MULTIPLIER 10
+#define ACTION_BTN 3 // External Fire Button (GP3 to GND)
 
 // -----------------------------------------------------------------------------
 // Global Variables & State
 // -----------------------------------------------------------------------------
 volatile int32_t encoder_ticks = 0;
-int16_t virtual_paddle_pos = 0; // Absolute paddle position (-127 to 127)
+int16_t virtual_paddle_pos = 0;
 uint8_t last_encoder_state = 0;
-bool last_mode_state = false;
+bool is_paddle_mode = false; // Set strictly in setup()
 
 // -----------------------------------------------------------------------------
 // Data Structures
@@ -114,7 +113,7 @@ typedef struct TU_ATTR_PACKED {
 } mouse_report_t;
 
 // -----------------------------------------------------------------------------
-// Interrupt Service Routine (ISR) for Rotary Encoder Decoding
+// Interrupt Service Routine (ISR)
 // -----------------------------------------------------------------------------
 void readEncoderISR() {
   uint8_t a = digitalRead(ENCODER_PIN_A);
@@ -148,20 +147,32 @@ void setup() {
   pinMode(ENCODER_PIN_B, INPUT_PULLUP);
   pinMode(ENCODER_BTN, INPUT_PULLUP);
   pinMode(MODE_SWITCH_PIN, INPUT_PULLUP);
+  pinMode(ACTION_BTN, INPUT_PULLUP);  // Add pull-up for GP3
+  delay(50); // Debounce hardware boot
+
+  // Sample mode switch pin ONCE at startup
+  is_paddle_mode = (digitalRead(MODE_SWITCH_PIN) == LOW);
 
   last_encoder_state = (digitalRead(ENCODER_PIN_A) << 1) | digitalRead(ENCODER_PIN_B);
 
   attachInterrupt(digitalPinToInterrupt(ENCODER_PIN_A), readEncoderISR, CHANGE);
   attachInterrupt(digitalPinToInterrupt(ENCODER_PIN_B), readEncoderISR, CHANGE);
 
-  delay(50); // Debounce
-
-  // Set PID to 0x810B to force host OS to flush descriptor cache
-  TinyUSBDevice.setID(0x239A, 0x810B);
-  usb_hid.setReportDescriptor(desc_composite, sizeof(desc_composite));
-  
   TinyUSBDevice.setManufacturerDescriptor("Open-Source");
-  TinyUSBDevice.setProductDescriptor("Spinner Paddle Hybrid");
+
+  if (is_paddle_mode) {
+    // Boot as dedicated Joystick Gamepad
+    TinyUSBDevice.setID(0x239A, 0x810C);
+    TinyUSBDevice.setProductDescriptor("Virtual Paddle Controller");
+    usb_hid.setReportDescriptor(desc_joystick, sizeof(desc_joystick));
+    Serial.println(">> BOOT MODE: Virtual Paddle (Joystick PID 0x810C)");
+  } else {
+    // Boot as dedicated Spinner Mouse
+    TinyUSBDevice.setID(0x239A, 0x810B);
+    TinyUSBDevice.setProductDescriptor("Spinner Controller");
+    usb_hid.setReportDescriptor(desc_mouse, sizeof(desc_mouse));
+    Serial.println(">> BOOT MODE: Spinner (Mouse PID 0x810B)");
+  }
 
   usb_hid.setPollInterval(2);
   usb_hid.begin();
@@ -173,32 +184,25 @@ void setup() {
 void loop() {
   if (!usb_hid.ready()) return;
 
-  bool is_paddle_mode = (digitalRead(MODE_SWITCH_PIN) == LOW);
-
-  // Print state change to Serial Monitor
-  if (is_paddle_mode != last_mode_state) {
-    last_mode_state = is_paddle_mode;
-    if (is_paddle_mode) {
-      Serial.println(">> MODE CHANGED: Virtual Paddle Mode (Joystick Report ID 2)");
-    } else {
-      Serial.println(">> MODE CHANGED: Spinner Mode (Mouse Report ID 1)");
-    }
-  }
-
-  // Atomically grab and reset accumulated encoder ticks
+  // Atomically grab ticks
   noInterrupts();
   int32_t ticks = encoder_ticks;
   encoder_ticks = 0;
   interrupts();
 
-  bool btn_pressed = (digitalRead(ENCODER_BTN) == LOW);
+// Read both physical buttons (Active LOW)
+  bool ec11_btn = (digitalRead(ENCODER_BTN) == LOW);
+  bool ext_btn  = (digitalRead(ACTION_BTN) == LOW);
+
+  // Active if EITHER button is pressed
+  bool fire_pressed = (ec11_btn || ext_btn);
 
   if (is_paddle_mode) {
     // -------------------------------------------------------------------------
-    // MODE 1: VIRTUAL PADDLE (Absolute Joystick on Report ID 2)
+    // VIRTUAL PADDLE MODE
     // -------------------------------------------------------------------------
     if (ticks != 0) {
-      virtual_paddle_pos += (ticks * 10); // Scaled up 10x for responsiveness
+      virtual_paddle_pos += (ticks * SENSITIVITY_MULTIPLIER);
 
       if (virtual_paddle_pos > 127)  virtual_paddle_pos = 127;
       if (virtual_paddle_pos < -127) virtual_paddle_pos = -127;
@@ -206,25 +210,24 @@ void loop() {
 
     dks_report_t report;
     memset(&report, 0, sizeof(report));
-    report.p1       = (int8_t)virtual_paddle_pos; // Encoder maps to Paddle 1 (Axis 0)
+    report.p1       = (int8_t)virtual_paddle_pos;
     report.p2       = 0;
     report.p3       = 0;
     report.p4       = 0;
-    report.buttons  = btn_pressed ? (1 << 0) : 0; // Encoder press = Button 1
-    report.hat_byte = 8;                          // Centered D-Pad
+    report.buttons  = fire_pressed ? (1 << 0) : 0; // Button 0 / A Press
+    report.hat_byte = 8; // Centered
 
-    usb_hid.sendReport(2, &report, sizeof(report));
+    usb_hid.sendReport(0, &report, sizeof(report));
 
   } else {
     // -------------------------------------------------------------------------
-    // MODE 2: SPINNER (Relative Mouse on Report ID 1)
+    // SPINNER MODE
     // -------------------------------------------------------------------------
-    int8_t mouse_dx = (int8_t)constrain(ticks * 10, -127, 127);
+    int8_t mouse_dx = (int8_t)constrain(ticks * SENSITIVITY_MULTIPLIER, -127, 127);
 
     mouse_report_t report;
     report.dx      = mouse_dx;
-    report.buttons = btn_pressed ? 0x01 : 0x00; // Encoder press = Left Click
-
-    usb_hid.sendReport(1, &report, sizeof(report));
+    report.buttons = fire_pressed ? 0x01 : 0x00; // Left Mouse Click
+    usb_hid.sendReport(0, &report, sizeof(report));
   }
 }
