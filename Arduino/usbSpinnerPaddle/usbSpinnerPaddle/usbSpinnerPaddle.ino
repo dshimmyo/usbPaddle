@@ -96,6 +96,15 @@ int16_t virtual_paddle_pos = 0;
 uint8_t last_encoder_state = 0;
 bool is_paddle_mode = false; // Set strictly in setup()
 
+// 4-bit Quadrature Lookup Table: Index = [Old_A, Old_B, New_A, New_B]
+// -1 = CCW, +1 = CW, 0 = Invalid Transition / Wiper Bounce
+static const int8_t encoder_table[16] = {
+     0,  1, -1,  0,
+    -1,  0,  0,  1,
+     1,  0,  0, -1,
+     0, -1,  1,  0
+};
+
 // -----------------------------------------------------------------------------
 // Data Structures
 // -----------------------------------------------------------------------------
@@ -114,27 +123,19 @@ typedef struct TU_ATTR_PACKED {
 } mouse_report_t;
 
 // -----------------------------------------------------------------------------
-// Interrupt Service Routine (ISR)
+// Interrupt Service Routine (ISR) - Updated to State-Machine Lookup
 // -----------------------------------------------------------------------------
 void readEncoderISR() {
   uint8_t a = digitalRead(ENCODER_PIN_A);
   uint8_t b = digitalRead(ENCODER_PIN_B);
-  uint8_t current_state = (a << 1) | b;
 
-  if (last_encoder_state != current_state) {
-    if ((last_encoder_state == 0b00 && current_state == 0b01) ||
-        (last_encoder_state == 0b01 && current_state == 0b11) ||
-        (last_encoder_state == 0b11 && current_state == 0b10) ||
-        (last_encoder_state == 0b10 && current_state == 0b00)) {
-      encoder_ticks++;
-    } 
-    else if ((last_encoder_state == 0b00 && current_state == 0b10) ||
-             (last_encoder_state == 0b10 && current_state == 0b11) ||
-             (last_encoder_state == 0b11 && current_state == 0b01) ||
-             (last_encoder_state == 0b01 && current_state == 0b00)) {
-      encoder_ticks--;
-    }
-    last_encoder_state = current_state;
+  // Shift previous 2-bit state left and append the new 2-bit state (creates a 4-bit index 0-15)
+  last_encoder_state = ((last_encoder_state << 2) | (a << 1) | b) & 0x0F;
+
+  // Apply delta directly from the lookup table
+  int8_t delta = encoder_table[last_encoder_state];
+  if (delta != 0) {
+    encoder_ticks += delta;
   }
 }
 
@@ -155,6 +156,7 @@ void setup() {
   // Sample mode switch pin ONCE at startup
   is_paddle_mode = (digitalRead(MODE_SWITCH_PIN) == LOW);
 
+  // Seed the initial state variable with current pin values
   last_encoder_state = (digitalRead(ENCODER_PIN_A) << 1) | digitalRead(ENCODER_PIN_B);
 
   attachInterrupt(digitalPinToInterrupt(ENCODER_PIN_A), readEncoderISR, CHANGE);
