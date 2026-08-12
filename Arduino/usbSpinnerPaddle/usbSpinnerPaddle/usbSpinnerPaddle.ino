@@ -93,7 +93,7 @@ Adafruit_USBD_HID usb_hid;
 // Global Variables & State
 // -----------------------------------------------------------------------------
 volatile int32_t encoder_ticks = 0;
-int16_t virtual_paddle_pos = 0;
+float virtual_paddle_pos = 0;
 uint8_t last_encoder_state = 0;
 bool is_paddle_mode = false; // Set strictly in setup()
 
@@ -189,8 +189,9 @@ void setup() {
 void loop() {
   if (!usb_hid.ready()) return;
 
+  // Map ADC (0 - 4095) to float range [0.5 to 20.0]
   int raw_trim = analogRead(TRIM_PIN);
-  int sensitivity = map(raw_trim, 0, 4095, 1, 20);
+  float sensitivity = 0.5f + (raw_trim / 4095.0f) * 19.5f; //int sensitivity = map(raw_trim, 0, 4095, 1, 20);
 
   // Atomically grab ticks
   noInterrupts();
@@ -210,10 +211,9 @@ void loop() {
     // VIRTUAL PADDLE MODE
     // -------------------------------------------------------------------------
     if (ticks != 0) {
-      virtual_paddle_pos += (ticks * sensitivity);
-
-      if (virtual_paddle_pos > 127)  virtual_paddle_pos = 127;
-      if (virtual_paddle_pos < -127) virtual_paddle_pos = -127;
+      virtual_paddle_pos += ((float)ticks * sensitivity);
+      if (virtual_paddle_pos > 127.0f)  virtual_paddle_pos = 127.0f;
+      if (virtual_paddle_pos < -127.0f) virtual_paddle_pos = -127.0f;
     }
 
   // 3. Standard Xbox/XInput Mapping
@@ -246,7 +246,23 @@ void loop() {
     // -------------------------------------------------------------------------
     // SPINNER MODE
     // -------------------------------------------------------------------------
-    int8_t mouse_dx = (int8_t)constrain(ticks * sensitivity, -127, 127);
+    //int8_t mouse_dx = (int8_t)constrain(ticks * sensitivity, -127, 127);
+
+    // Global or static accumulator float
+    static float mouse_x_accumulator = 0.0f;
+
+    // Add new movement to accumulator
+    mouse_x_accumulator += ((float)ticks * sensitivity);
+
+    // Extract whole integer mouse steps to send
+    int8_t mouse_dx = (int8_t)mouse_x_accumulator;
+
+    // Keep remainder in the accumulator for the next frame
+    mouse_x_accumulator -= (float)mouse_dx;
+
+    // Constrain for HID report limits (-127 to 127)
+    mouse_dx = (int8_t)constrain(mouse_dx, -127, 127);
+
     uint32_t buttons = 0;
     if (fire1_pressed)      buttons |= (1 << 0);  // A (Bottom)
     if (fire2_pressed)      buttons |= (1 << 2);  // B (Right)
