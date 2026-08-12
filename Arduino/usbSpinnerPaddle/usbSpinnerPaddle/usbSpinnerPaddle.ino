@@ -86,6 +86,7 @@ Adafruit_USBD_HID usb_hid;
 #define MODE_SWITCH_PIN 15 // Mode Toggle sampled ONCE at startup
 #define SENSITIVITY_MULTIPLIER 10
 #define ACTION_BTN 3 // External Fire Button (GP3 to GND)
+#define TRIM_PIN 26 // Connect wiper to GP26 (A0)
 
 // -----------------------------------------------------------------------------
 // Global Variables & State
@@ -148,6 +149,7 @@ void setup() {
   pinMode(ENCODER_BTN, INPUT_PULLUP);
   pinMode(MODE_SWITCH_PIN, INPUT_PULLUP);
   pinMode(ACTION_BTN, INPUT_PULLUP);  // Add pull-up for GP3
+  analogReadResolution(12); // RP2040 uses 12-bit ADC (0 to 4095)
   delay(50); // Debounce hardware boot
 
   // Sample mode switch pin ONCE at startup
@@ -184,6 +186,9 @@ void setup() {
 void loop() {
   if (!usb_hid.ready()) return;
 
+  int raw_trim = analogRead(TRIM_PIN);
+  int sensitivity = map(raw_trim, 0, 4095, 1, 20);
+
   // Atomically grab ticks
   noInterrupts();
   int32_t ticks = encoder_ticks;
@@ -202,7 +207,7 @@ void loop() {
     // VIRTUAL PADDLE MODE
     // -------------------------------------------------------------------------
     if (ticks != 0) {
-      virtual_paddle_pos += (ticks * SENSITIVITY_MULTIPLIER);
+      virtual_paddle_pos += (ticks * sensitivity);
 
       if (virtual_paddle_pos > 127)  virtual_paddle_pos = 127;
       if (virtual_paddle_pos < -127) virtual_paddle_pos = -127;
@@ -223,7 +228,7 @@ void loop() {
     // -------------------------------------------------------------------------
     // SPINNER MODE
     // -------------------------------------------------------------------------
-    int8_t mouse_dx = (int8_t)constrain(ticks * SENSITIVITY_MULTIPLIER, -127, 127);
+    int8_t mouse_dx = (int8_t)constrain(ticks * sensitivity, -127, 127);
 
     mouse_report_t report;
     report.dx      = mouse_dx;
