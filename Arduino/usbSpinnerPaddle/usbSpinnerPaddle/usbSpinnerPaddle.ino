@@ -1,4 +1,5 @@
 #include "Adafruit_TinyUSB.h"
+#include "hardware/watchdog.h" // Needed for RP2040 hardware reset
 
 // -----------------------------------------------------------------------------
 // USB HID Descriptors
@@ -85,12 +86,15 @@ Adafruit_USBD_HID usb_hid;
 #define ACTION_BTN1     2  // Ext button gp2
 #define ACTION_BTN2     3 // External Fire Button (GP3 to GND)
 
-#define MODE_SWITCH_PIN 15 // Mode Toggle sampled ONCE at startup
-#define MAX_TICKS_REFERENCE 600
-#define ENCODER_TICKS_PER_ROTATION 20
-#define SENSITIVITY_MULTIPLIER MAX_TICKS_REFERENCE / ENCODER_TICKS_PER_ROTATION //30 //600 / 20
-#define PADDLE_SENSITIVITY_MULTIPLIER 0.5f
-#define TRIM_PIN 26 // Connect wiper to GP26 (A0)
+#define MODE_SWITCH_PIN 15 // Mode Toggle sampled ONCE at startup (and monitored for reboot)
+#define TRIM_PIN 26        // Connect wiper to GP26 (A0)
+
+#define MAX_TICKS_REFERENCE 600.0f
+#define MIN_TICKS_REFERENCE 20.0f
+#define ENCODER_TICKS_PER_ROTATION 20.0f
+#define SENSITIVITY_MULTIPLIER_MAX ((MAX_TICKS_REFERENCE / ENCODER_TICKS_PER_ROTATION) * 2.0f)
+#define SENSITIVITY_MULTIPLIER_MIN (MIN_TICKS_REFERENCE / ENCODER_TICKS_PER_ROTATION)
+#define PADDLE_SENSITIVITY_MULTIPLIER 0.75f
 
 // -----------------------------------------------------------------------------
 // Global Variables & State
@@ -98,10 +102,10 @@ Adafruit_USBD_HID usb_hid;
 volatile int32_t encoder_ticks = 0;
 float virtual_paddle_pos = 0;
 uint8_t last_encoder_state = 0;
-bool is_paddle_mode = false; // Set strictly in setup()
+bool is_paddle_mode = false; 
+int last_mode_switch_state = HIGH; // Tracks physical pin state for reboot trigger
 
 // 4-bit Quadrature Lookup Table: Index = [Old_A, Old_B, New_A, New_B]
-// -1 = CCW, +1 = CW, 0 = Invalid Transition / Wiper Bounce
 static const int8_t encoder_table[16] = {
      0,  1, -1,  0,
     -1,  0,  0,  1,
@@ -127,16 +131,14 @@ typedef struct TU_ATTR_PACKED {
 } mouse_report_t;
 
 // -----------------------------------------------------------------------------
-// Interrupt Service Routine (ISR) - Updated to State-Machine Lookup
+// Interrupt Service Routine (ISR)
 // -----------------------------------------------------------------------------
 void readEncoderISR() {
   uint8_t a = digitalRead(ENCODER_PIN_A);
   uint8_t b = digitalRead(ENCODER_PIN_B);
 
-  // Shift previous 2-bit state left and append the new 2-bit state (creates a 4-bit index 0-15)
   last_encoder_state = ((last_encoder_state << 2) | (a << 1) | b) & 0x0F;
 
-  // Apply delta directly from the lookup table
   int8_t delta = encoder_table[last_encoder_state];
   if (delta != 0) {
     encoder_ticks += delta;
@@ -157,8 +159,9 @@ void setup() {
   analogReadResolution(12); // RP2040 uses 12-bit ADC (0 to 4095)
   delay(50); // Debounce hardware boot
 
-  // Sample mode switch pin ONCE at startup
-  is_paddle_mode = (digitalRead(MODE_SWITCH_PIN) == LOW);
+  // Read initial state of the switch for mode decision & transition tracking
+  last_mode_switch_state = digitalRead(MODE_SWITCH_PIN);
+  is_paddle_mode = (last_mode_switch_state == LOW);
 
   // Seed the initial state variable with current pin values
   last_encoder_state = (digitalRead(ENCODER_PIN_A) << 1) | digitalRead(ENCODER_PIN_B);
@@ -190,22 +193,30 @@ void setup() {
 // Main Loop
 // -----------------------------------------------------------------------------
 void loop() {
+  // 1. Check for Mode Switch State Transition -> Trigger Reboot
+  int current_switch_state = digitalRead(MODE_SWITCH_PIN);
+  if (current_switch_state != last_mode_switch_state) {
+    delay(20); // Filter contact bounce
+    if (digitalRead(MODE_SWITCH_PIN) == current_switch_state) {
+      // Force hardware reset on RP2040 to re-enumerate USB HID descriptor
+      watchdog_reboot(0, 0, 0); 
+    }
+  }
+
   if (!usb_hid.ready()) return;
 
-  // Map ADC (0 - 4095) to float range [0.5 to 20.0]
+  // Map ADC (0 - 4095) to exponential sensitivity float range
   int raw_trim = analogRead(TRIM_PIN);
   float pMult = is_paddle_mode ? PADDLE_SENSITIVITY_MULTIPLIER : 1.0f;
-  float sensitivity = 0.25f + (raw_trim / 4095.0f) * (SENSITIVITY_MULTIPLIER * pMult - 0.25f); //int sensitivity = map(raw_trim, 0, 4095, 1, SENSITIVITY_MULTIPLIER);
-  
-  // float sensitivity;//split setup
-  // if (raw_trim < 2048.0f) {
-  //     // LEFT HALF (0 to 2047): Scale smoothly from 0.5 to 1.0
-  //     // Center point (2047) output is exactly 1.0 (1:1 unscaled tracking)
-  //     sensitivity = 0.5f + (raw_trim / 2048.0f) * (1.0f - 0.25f);
-  // } else {
-  //     // RIGHT HALF (2048 to 4095): Scale smoothly from 1.0 up to 20.0
-  //     sensitivity = 1.0f + ((raw_trim - 2048.0f) / 2047.0f) * (20.0f - 1.0f);
-  // }
+  float max_mult = SENSITIVITY_MULTIPLIER_MAX * pMult;
+  float min_mult = SENSITIVITY_MULTIPLIER_MIN;
+
+  // Normalize ADC to 0.0 - 1.0 range
+  float norm_trim = raw_trim / 4095.0f;
+
+  // Exponential scaling calculation
+  float sensitivity = min_mult * powf(max_mult / min_mult, norm_trim);
+
   // Atomically grab ticks
   noInterrupts();
   int32_t ticks = encoder_ticks;
@@ -214,10 +225,7 @@ void loop() {
 
 // Read both physical buttons (Active LOW)
   bool fire1_pressed = (digitalRead(ACTION_BTN1) == LOW);
-  bool fire2_pressed  = (digitalRead(ACTION_BTN2) == LOW);
-
-  // Active if EITHER button is pressed
-  //bool fire1_pressed = ext_btn1;
+  bool fire2_pressed = (digitalRead(ACTION_BTN2) == LOW);
 
   if (is_paddle_mode) {
     // -------------------------------------------------------------------------
@@ -250,7 +258,7 @@ void loop() {
     report.p2       = 0;
     report.p3       = 0;
     report.p4       = 0;
-    report.buttons  = buttons;//fire1_pressed ? (1 << 0) : 0; // Button 0 / A Press
+    report.buttons  = buttons;
     report.hat_byte = 8; // Centered
 
     usb_hid.sendReport(0, &report, sizeof(report));
@@ -259,9 +267,6 @@ void loop() {
     // -------------------------------------------------------------------------
     // SPINNER MODE
     // -------------------------------------------------------------------------
-    //int8_t mouse_dx = (int8_t)constrain(ticks * sensitivity, -127, 127);
-
-    // Global or static accumulator float
     static float mouse_x_accumulator = 0.0f;
 
     // Add new movement to accumulator
@@ -277,8 +282,8 @@ void loop() {
     mouse_dx = (int8_t)constrain(mouse_dx, -127, 127);
 
     uint32_t buttons = 0;
-    if (fire1_pressed)      buttons |= (1 << 0);  // A (Bottom)
-    if (fire2_pressed)      buttons |= (1 << 2);  // B (Right)
+    if (fire1_pressed)      buttons |= (1 << 0);  // Left Mouse
+    if (fire2_pressed)      buttons |= (1 << 2);  // Middle Mouse (based on Tempest button defaults)
     mouse_report_t report;
     report.dx      = mouse_dx;
     report.buttons = buttons;//fire1_pressed ? 0x01 : 0x00; // Left Mouse Click
