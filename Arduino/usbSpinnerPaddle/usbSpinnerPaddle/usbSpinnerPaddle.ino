@@ -86,7 +86,10 @@ Adafruit_USBD_HID usb_hid;
 #define ACTION_BTN2     3 // External Fire Button (GP3 to GND)
 
 #define MODE_SWITCH_PIN 15 // Mode Toggle sampled ONCE at startup
-#define SENSITIVITY_MULTIPLIER 10
+#define MAX_TICKS_REFERENCE 600
+#define ENCODER_TICKS_PER_ROTATION 20
+#define SENSITIVITY_MULTIPLIER MAX_TICKS_REFERENCE / ENCODER_TICKS_PER_ROTATION //30 //600 / 20
+#define PADDLE_SENSITIVITY_MULTIPLIER 0.5f
 #define TRIM_PIN 26 // Connect wiper to GP26 (A0)
 
 // -----------------------------------------------------------------------------
@@ -191,8 +194,18 @@ void loop() {
 
   // Map ADC (0 - 4095) to float range [0.5 to 20.0]
   int raw_trim = analogRead(TRIM_PIN);
-  float sensitivity = 0.5f + (raw_trim / 4095.0f) * 19.5f; //int sensitivity = map(raw_trim, 0, 4095, 1, 20);
-
+  float pMult = is_paddle_mode ? PADDLE_SENSITIVITY_MULTIPLIER : 1.0f;
+  float sensitivity = 0.25f + (raw_trim / 4095.0f) * (SENSITIVITY_MULTIPLIER * pMult - 0.25f); //int sensitivity = map(raw_trim, 0, 4095, 1, SENSITIVITY_MULTIPLIER);
+  
+  // float sensitivity;//split setup
+  // if (raw_trim < 2048.0f) {
+  //     // LEFT HALF (0 to 2047): Scale smoothly from 0.5 to 1.0
+  //     // Center point (2047) output is exactly 1.0 (1:1 unscaled tracking)
+  //     sensitivity = 0.5f + (raw_trim / 2048.0f) * (1.0f - 0.25f);
+  // } else {
+  //     // RIGHT HALF (2048 to 4095): Scale smoothly from 1.0 up to 20.0
+  //     sensitivity = 1.0f + ((raw_trim - 2048.0f) / 2047.0f) * (20.0f - 1.0f);
+  // }
   // Atomically grab ticks
   noInterrupts();
   int32_t ticks = encoder_ticks;
