@@ -221,7 +221,6 @@
 		(symbol "Device:RotaryEncoder"
 			(pin_names
 				(offset 0.254)
-				(hide yes)
 			)
 			(exclude_from_sim no)
 			(in_bom yes)
@@ -2825,7 +2824,7 @@
 				)
 			)
 		)
-		(property "Value" "R_Potentiometer_Trim"
+		(property "Value" "10KΩ Linear"
 			(at 165.1 119.38 90)
 			(show_name no)
 			(do_not_autoplace no)
