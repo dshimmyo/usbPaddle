@@ -81,8 +81,8 @@ Adafruit_USBD_HID usb_hid;
 // -----------------------------------------------------------------------------
 // Pin Definitions
 // -----------------------------------------------------------------------------
-#define ENCODER_PIN_A   0  // EC11 Phase A
-#define ENCODER_PIN_B   1  // EC11 Phase B
+#define ENCODER_PIN_A   1//EC12 Phase A (Flipped because of differing pinouts ABC instead of ACB)  // EC11 Phase A //0
+#define ENCODER_PIN_B   0//EC12 Phase B (Flipped because of differing pinouts ABC instead of ACB)  // EC11 Phase B //1
 #define ACTION_BTN1     2  // Ext button gp2
 #define ACTION_BTN2     3 // External Fire Button (GP3 to GND)
 
@@ -91,7 +91,7 @@ Adafruit_USBD_HID usb_hid;
 
 #define MAX_TICKS_REFERENCE 600.0f
 #define MIN_TICKS_REFERENCE 20.0f
-#define ENCODER_TICKS_PER_ROTATION 20.0f //set this to the rotary encoder you are using in your build
+#define ENCODER_TICKS_PER_ROTATION 24.0f//20.0f //set this to the rotary encoder you are using in your build
 #define SENSITIVITY_MULTIPLIER_MAX ((MAX_TICKS_REFERENCE / ENCODER_TICKS_PER_ROTATION) * 2.0f)
 #define SENSITIVITY_MULTIPLIER_MIN (MIN_TICKS_REFERENCE / ENCODER_TICKS_PER_ROTATION)
 #define PADDLE_SENSITIVITY_MULTIPLIER 0.75f
