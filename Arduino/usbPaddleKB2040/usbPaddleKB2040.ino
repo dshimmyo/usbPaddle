@@ -1,4 +1,5 @@
 #include "Adafruit_TinyUSB.h"
+#include <Adafruit_NeoPixel.h>
 
 uint8_t const desc_normal[] = { 
   // Collection 1: Standard Joystick Baseline
@@ -47,6 +48,9 @@ uint8_t const desc_normal[] = {
 Adafruit_USBD_HID usb_hid;
 
 // Define Pins
+#define NEOPIXEL_PIN 16
+#define NUM_PIXELS   1
+
 #define POT_PIN1 26 //A0
 #define POT_PIN2 27 //A1
 #define POT_PIN3 28 //A2
@@ -83,8 +87,14 @@ typedef struct TU_ATTR_PACKED {
   uint8_t hat_byte;
 } dks_report_t;
 
+Adafruit_NeoPixel statusLed(NUM_PIXELS, NEOPIXEL_PIN, NEO_GRB + NEO_KHZ800);
 
 void setup() {
+  statusLed.begin();
+    
+  // Set a very faint amber glow (Red = 2, Green = 1, Blue = 0)
+  statusLed.setPixelColor(0, statusLed.Color(2, 1, 0));
+  statusLed.show();
 
   pinMode(BTN_UP, INPUT_PULLUP);
   pinMode(BTN_DOWN, INPUT_PULLUP);
